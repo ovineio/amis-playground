@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+  
       - uses: pnpm/action-setup@v4
         name: Install pnpm
         with:
@@ -49,6 +49,11 @@ jobs:
           node-version: 18
           cache: 'pnpm'
 
+      - name: SET SSH KEY
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      
       - name: Install dependencies
         run: pnpm install
 

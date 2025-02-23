@@ -16,7 +16,7 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
       - uses: pnpm/action-setup@v2
         with:
-          version: 7
+          version: 8
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -48,13 +48,7 @@ jobs:
         run: pnpm install
       - name: Build
         run: pnpm run build
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          # Upload dist repository
-          path: './dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+          folder: dist # The folder the action should deploy.

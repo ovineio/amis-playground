@@ -1,6 +1,4 @@
 # This is a basic workflow to help you get started with Actions
-# form: https://juejin.cn/post/7334714350899642407
-
 name: Deploy To Github Pages
 
 # Controls when the workflow will run
@@ -16,7 +14,7 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -33,6 +31,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    # 步骤
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,7 +59,7 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Deploy 🚀
+      - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist # The folder the action should deploy.

@@ -9,6 +9,7 @@ import React, { useMemo } from 'react'
 import { usePreviewComponent } from './bundler'
 import dependencies from './dependencies'
 import { MAIN_FILE_NAME, ENTRY_FILE_NAME } from '../../templateAmis/files'
+import { Message } from '../Message'
 
 import styles from './index.module.less'
 
@@ -61,11 +62,7 @@ const A: React.FC<IOutput> = (props) => {
   return (
     <div className={styles.panelWrapper}>
       {bundling && !Preview ? 'loading ...' : Preview && <Preview />}
-      {error && (
-        <div className={styles.panelError}>
-          <pre>{error.toString()}</pre>
-        </div>
-      )}
+      <Message type='error' context={error} />
     </div>
   )
 }

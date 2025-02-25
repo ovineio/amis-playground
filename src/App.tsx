@@ -1,4 +1,4 @@
-import { Playground  } from '@/Playground'
+import { Playground } from '@/Playground'
 
 function App() {
   const handleFilesHash = (hash: string) => {

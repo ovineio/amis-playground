@@ -36,10 +36,12 @@ export const Header: React.FC = () => {
 
   return (
     <nav className={styles.header}>
-      <div className={styles.logo}>
-        <img alt='logo' src={icons.AmisLogo} />
-        <span> Playground</span>
-      </div>
+      <a target='_blank' href='https://github.com/ovineio/amis-playground'>
+        <div className={styles.logo}>
+          <img alt='logo' src={icons.AmisLogo} />
+          <span> Playground</span>
+        </div>
+      </a>
       <div className={styles.links}>
         {theme === 'light' && (
           <button

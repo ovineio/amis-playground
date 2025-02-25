@@ -5,7 +5,7 @@
 import { render, AlertComponent, ToastComponent } from 'amis'
 import amisJson from './amisJson'
 import env from './env'
-
+import './mock'
 import './App.css'
 
 const App = () => {

@@ -3,6 +3,7 @@ import App from './src/App.tsx?raw'
 import main from './src/main.tsx?raw'
 import amisJson from './src/amisJson.ts?raw'
 import env from './src/env.ts?raw'
+import mock from './src/mock.ts?raw'
 import { getFilesFromUrl, fileName2Language } from '../utils'
 
 import type { IFiles } from '../types'
@@ -29,6 +30,11 @@ export const initFiles: IFiles = getFilesFromUrl() || {
     name: "amisJson.ts",
     language: 'typescript',
     value: amisJson,
+  },
+  'mock.ts': {
+    name: "mock.ts",
+    language: 'typescript',
+    value: mock,
   },
   'App.css': {
     name: 'App.css',

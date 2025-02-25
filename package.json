@@ -51,36 +51,38 @@
     "prepublish": "npm run docs && npm run build && npm publish"
   },
   "dependencies": {
-    "debug": "^4.3.4",
+    "@fortawesome/fontawesome-free": "^6.1.1",
     "@babel/standalone": "^7.23.1",
     "@monaco-editor/react": "^4.5.2",
     "@typescript/ata": "^0.9.4",
     "allotment": "^1.19.3",
+    "amis": "6.11.0",
+    "amis-core": "6.11.0",
+    "amis-ui": "6.11.0",
+    "axios": "1.7.9",
     "classnames": "^2.3.2",
+    "copy-to-clipboard": "3.3.1",
+    "debug": "^4.3.4",
+    "fakerest": "^4.1.2",
     "fflate": "^0.8.1",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
+    "lodash": "^4.17.15",
+    "mockjs": "^1.1.0",
     "monaco-editor": "^0.43.0",
     "monaco-jsx-syntax-highlight": "^1.2.0",
     "react": "^18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
-    "amis": "6.11.0",
-    "amis-core": "6.11.0",
-    "amis-ui": "6.11.0",
-    "axios": "1.7.9",
-    "lodash": "^4.17.15",
     "react-router": "5.2.1",
     "react-router-dom": "5.3.0",
-    "copy-to-clipboard": "3.3.1"
+    "sinon": "^19.0.2"
   },
   "peerDependencies": {
     "react": ">=18.2.0",
     "react-dom": ">=18.2.0"
   },
   "devDependencies": {
-    "esbuild-wasm": "0.20.1",
-    "stylis": "^4.1.1",
     "@types/babel__standalone": "^7.1.5",
     "@types/file-saver": "^2.0.5",
     "@types/node": "^20.8.10",
@@ -89,6 +91,7 @@
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
+    "esbuild-wasm": "0.20.1",
     "eslint": "^8.45.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.1.0",
@@ -113,16 +116,13 @@
     "stylelint-less": "^2.0.0",
     "stylelint-order": "^6.0.3",
     "stylelint-prettier": "^4.0.2",
+    "stylis": "^4.1.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-monaco-editor": "^1.1.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      
-    ],
-    "src/**/*.{css,less,scss}": [
-     
-    ]
+    "src/**/*.{js,jsx,ts,tsx}": [],
+    "src/**/*.{css,less,scss}": []
   }
 }

@@ -3,10 +3,9 @@ import React, { useContext, useEffect } from 'react'
 import { EditorContainer } from './components/EditorContainer'
 import { Header } from './components/Header'
 import { Output as OutputBundle } from './components/OutputBundle'
-import { Sandbox } from './components/Sandbox'
 import { SplitPane } from './components/SplitPane'
-import { ENTRY_FILE_NAME, initFiles, MAIN_FILE_NAME } from './templateAmis/files'
 import { PlaygroundContext, PlaygroundProvider } from './PlaygroundContext'
+import { ENTRY_FILE_NAME, initFiles, MAIN_FILE_NAME } from './templateAmis/files'
 import { getCustomActiveFile, getMergedCustomFiles, getPlaygroundTheme } from './utils'
 
 import type { IPlayground } from './types'
@@ -103,5 +102,3 @@ export const Playground: React.FC<IPlayground> = (props) => {
     </PlaygroundProvider>
   )
 }
-
-export const PlaygroundSandbox = Sandbox

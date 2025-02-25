@@ -1,1 +1,0 @@
-import{a as e,e as n,f as o,B as u}from"./index-cf399bba.js";var p=function(r){e(t,r);function t(){return r!==null&&r.apply(this,arguments)||this}return t=n([o({type:"button-group"})],t),t}(u);export{p as ButtonGroupRenderer,u as default};

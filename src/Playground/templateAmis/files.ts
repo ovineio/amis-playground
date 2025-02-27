@@ -16,15 +16,15 @@ export const IMPORT_MAP_FILE_NAME = 'import-map.json'
 export const ENTRY_FILE_NAME = 'main.tsx'
 
 export const initFiles: IFiles = getFilesFromUrl() || {
-  [MAIN_FILE_NAME]: {
-    name: MAIN_FILE_NAME,
-    language: fileName2Language(MAIN_FILE_NAME),
-    value: App,
-  },
   [ENTRY_FILE_NAME]: {
     name: ENTRY_FILE_NAME,
     language: fileName2Language(ENTRY_FILE_NAME),
     value: main,
+  },
+  [MAIN_FILE_NAME]: {
+    name: MAIN_FILE_NAME,
+    language: fileName2Language(MAIN_FILE_NAME),
+    value: App,
   },
   'amisJson.ts':{
     name: "amisJson.ts",

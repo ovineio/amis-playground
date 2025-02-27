@@ -81,6 +81,7 @@ export const Editor: React.FC<Props> = (props) => {
         value={file.value}
         onChange={onChange}
         onMount={handleEditorDidMount}
+        loading={<Loading size='lg' text='loading...' />}
         options={{
           ...MonacoEditorConfig,
           ...{
@@ -90,7 +91,7 @@ export const Editor: React.FC<Props> = (props) => {
         }}
       />
       <div className='react-playground-editor-types-loading'>
-        {total > 0 ? <Loading finished={finished}></Loading> : null}
+        {total > 0 ? <Loading finished={finished} /> : null}
       </div>
     </>
   )

@@ -97,7 +97,6 @@ export const FileSelector: React.FC<IFileSelector> = (props) => {
           onClick={() => handleClickTab(item)}
         />
       ))}
-
       {!readOnly && (
         <div className={styles.add} onClick={addTab}>
           +

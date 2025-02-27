@@ -25,7 +25,6 @@ const ReactPlayground = (props: IPlayground) => {
     theme,
     files: propsFiles,
     importMap,
-    showCompileOutput = true,
     showHeader = true,
     showFileSelector = true,
     fileSelectorReadOnly = false,

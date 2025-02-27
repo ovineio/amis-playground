@@ -1,0 +1,7 @@
+node_modules
+.codesandbox
+.devcontainer
+.pnpm-debug.log
+report.html
+dist
+.DS_Store

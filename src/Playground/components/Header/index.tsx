@@ -1,12 +1,20 @@
 import React, { useContext, useState } from 'react'
-// @ts-ignore
 import { CopyToClipboard } from 'react-copy-to-clipboard'
 
+import { SelectCase } from './SelectCase'
 import { downloadFiles, icons } from './utils'
 
 import styles from './index.module.less'
 
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
+
+const Actions = () => {
+  return (
+    <div className={styles.actions}>
+      <SelectCase />
+    </div>
+  )
+}
 
 export const Header: React.FC = () => {
   const { files, theme, changeTheme, filesHash } = useContext(PlaygroundContext)
@@ -42,6 +50,7 @@ export const Header: React.FC = () => {
           <span> Playground</span>
         </div>
       </a>
+      <Actions />
       <div className={styles.links}>
         {theme === 'light' && (
           <button
@@ -51,6 +60,7 @@ export const Header: React.FC = () => {
             onClick={() => changeTheme('dark')}
           />
         )}
+
         {theme === 'dark' && (
           <button
             title='Toggle light mode'
@@ -74,11 +84,7 @@ export const Header: React.FC = () => {
           onClick={downloadProject}
         />
 
-        <a
-          href='https://github.com/ovineio/amis-playground'
-          target='_blank'
-          title='View on GitHub'
-        >
+        <a href='https://github.com/ovineio/amis-playground' target='_blank' title='View on GitHub'>
           <button dangerouslySetInnerHTML={{ __html: icons.GithubSvg }} />
         </a>
       </div>

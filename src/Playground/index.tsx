@@ -1,16 +1,25 @@
+import moment from 'moment'
 import React, { useContext, useEffect } from 'react'
 
 import { EditorContainer } from './components/EditorContainer'
 import { Header } from './components/Header'
+import { setCaseFiles } from './components/Header/utils'
 import { Output as OutputBundle } from './components/OutputBundle'
 import { SplitPane } from './components/SplitPane'
 import { PlaygroundContext, PlaygroundProvider } from './PlaygroundContext'
-import { ENTRY_FILE_NAME, initFiles, MAIN_FILE_NAME } from './templateAmis/files'
-import { getCustomActiveFile, getMergedCustomFiles, getPlaygroundTheme } from './utils'
+import { MAIN_FILE_NAME } from './templateAmis/files'
+import {
+  getCustomActiveFile,
+  getFilesHashFromUrl,
+  getMergedCustomFiles,
+  getPlaygroundTheme,
+} from './utils'
 
 import type { IPlayground } from './types'
 
 import './index.less'
+import { addNewVersion, initCaseTree } from '@/localServer/caseService'
+import { getAppSetting } from '@/localServer/settingService'
 
 const defaultCodeSandboxOptions = {
   theme: 'dark',
@@ -33,7 +42,7 @@ const ReactPlayground = (props: IPlayground) => {
     onFilesChange,
     autorun = true,
   } = props
-  const { filesHash, changeTheme, files, setFiles, setSelectedFileName } =
+  const { filesHash, changeTheme, files, setFiles, setSelectedFileName, setAppSetting } =
     useContext(PlaygroundContext)
   const options = Object.assign(defaultCodeSandboxOptions, props.options || {})
 
@@ -64,11 +73,44 @@ const ReactPlayground = (props: IPlayground) => {
     }, 15)
   }, [theme])
 
+  const initPlayGroundData = async () => {
+    await initCaseTree()
+    let appSetting = await getAppSetting()
+    let caseId = appSetting.caseId || 'baseSimple'
+    let caseVersion = appSetting.caseVersion || 1
+
+    const shareFilesHash = getFilesHashFromUrl()
+    if (shareFilesHash) {
+      caseId = 'myShare'
+      caseVersion = await addNewVersion(caseId, `T-${moment().format('YYMMDD-hh:mm:ss')}`)
+      await setCaseFiles(caseId, caseVersion, shareFilesHash, true)
+
+      // 删除 share 参数
+      const urlQuery = new URLSearchParams(location.search)
+      urlQuery.delete('share')
+      const newUrl = location.origin + location.pathname + '?' + urlQuery.toString()
+      history.replaceState({}, '', newUrl)
+    }
+
+    if (caseId && caseVersion) {
+      appSetting = {
+        ...appSetting,
+        caseId,
+        caseVersion,
+      }
+    }
+
+    setAppSetting({
+      initial: true,
+      ...appSetting,
+    })
+  }
+
   useEffect(() => {
-    if (!propsFiles) setFiles(initFiles)
+    initPlayGroundData()
   }, [])
 
-  return files[ENTRY_FILE_NAME] ? (
+  return (
     <div
       data-id='react-playground'
       className={theme}
@@ -91,7 +133,7 @@ const ReactPlayground = (props: IPlayground) => {
         </SplitPane>
       </div>
     </div>
-  ) : null
+  )
 }
 
 export const Playground: React.FC<IPlayground> = (props) => {

@@ -31,4 +31,10 @@ export const defaultCaseTree = [
       },
     ],
   },
+  {
+    label: '来自分享',
+    value: 'myShare',
+    disabled: true,
+    children: [],
+  },
 ]

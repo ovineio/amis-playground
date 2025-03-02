@@ -1,9 +1,11 @@
 import React, { createContext, useEffect, useState } from 'react'
 
+import { setCaseFiles } from './components/Header/utils'
 import { MAIN_FILE_NAME } from './templateAmis/files'
 import { fileName2Language, setPlaygroundTheme, utoa } from './utils'
 
-import type { IFiles, IPlaygroundContext, ITheme } from './types'
+import type { ContextAppSetting, IFiles, IPlaygroundContext } from './types'
+import * as settingService from '@/localServer/settingService'
 
 const initialContext: Partial<IPlaygroundContext> = {
   selectedFileName: MAIN_FILE_NAME,
@@ -17,12 +19,15 @@ export const PlaygroundProvider = (props: {
   children: React.ReactElement
   saveOnUrl?: boolean
 }) => {
-  const { children, saveOnUrl = true } = props
+  const { children } = props
 
   const [files, setFiles] = useState<IFiles>({})
-  const [theme, setTheme] = useState(initialContext.theme!)
-  const [selectedFileName, setSelectedFileName] = useState(initialContext.selectedFileName!)
   const [filesHash, setFilesHash] = useState('')
+  const [appSetting, _setAppSetting] = useState<Partial<ContextAppSetting>>({
+    initial: false,
+    theme: 'light',
+    activeFileTab: MAIN_FILE_NAME,
+  })
 
   const addFile = (name: string) => {
     files[name] = {
@@ -54,27 +59,37 @@ export const PlaygroundProvider = (props: {
     })
   }
 
-  const changeTheme = (theme: ITheme) => {
+  const changeTheme = (theme) => {
     setPlaygroundTheme(theme)
-    setTheme(theme)
+    setAppSetting({ theme })
   }
 
   useEffect(() => {
     const hash = utoa(JSON.stringify(files))
-    if (saveOnUrl) window.location.hash = hash
     setFilesHash(hash)
+    const { caseId, caseVersion } = appSetting
+    if (caseId && caseVersion) {
+      setCaseFiles(caseId, caseVersion, hash)
+    }
   }, [files])
+
+  const setAppSetting = async (setting = {}) => {
+    const { initial, ...rest } = setting
+    _setAppSetting((pre) => ({
+      ...pre,
+      ...setting,
+    }))
+    settingService.setAppSetting(rest)
+  }
 
   return (
     <PlaygroundContext.Provider
       value={{
-        theme,
+        appSetting,
+        setAppSetting,
+        changeTheme,
         filesHash,
         files,
-        selectedFileName,
-        setTheme,
-        changeTheme,
-        setSelectedFileName,
         setFiles,
         addFile,
         removeFile,

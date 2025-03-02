@@ -1,7 +1,7 @@
 import { baseSimple } from './baseSimple'
-import { customBase } from './customBase'
+import { myCustomBase } from './myCustomBase'
 
 export const caseFilesMap: any = {
   baseSimple,
-  customBase,
+  myCustomBase,
 }

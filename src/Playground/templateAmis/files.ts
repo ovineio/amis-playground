@@ -4,7 +4,6 @@ import main from './src/main.tsx?raw'
 import amisJson from './src/amisJson.ts?raw'
 import env from './src/env.ts?raw'
 import mock from './src/mock.ts?raw'
-import { getFilesFromUrl, fileName2Language } from '../utils'
 
 import type { IFiles } from '../types'
 
@@ -15,15 +14,15 @@ export const IMPORT_MAP_FILE_NAME = 'import-map.json'
 // app入口文件名
 export const ENTRY_FILE_NAME = 'main.tsx'
 
-export const initFiles: IFiles = getFilesFromUrl() || {
+export const initFiles: IFiles = {
   [ENTRY_FILE_NAME]: {
     name: ENTRY_FILE_NAME,
-    language: fileName2Language(ENTRY_FILE_NAME),
+    language: 'typescript',
     value: main,
   },
   [MAIN_FILE_NAME]: {
     name: MAIN_FILE_NAME,
-    language: fileName2Language(MAIN_FILE_NAME),
+    language: 'typescript',
     value: App,
   },
   'amisJson.ts':{
@@ -51,7 +50,7 @@ export const initFiles: IFiles = getFilesFromUrl() || {
 export const reactTemplateFiles = {
   [ENTRY_FILE_NAME]: {
     name: ENTRY_FILE_NAME,
-    language: fileName2Language(ENTRY_FILE_NAME),
+    language: 'typescript',
     value: main,
   },
 }

@@ -1,3 +1,4 @@
+import { AppSetting } from '@/localServer/settingService'
 import { editor } from 'monaco-editor'
 import React from 'react'
 
@@ -65,6 +66,9 @@ export type IPlayground = {
   IOutput &
   ISplitPane
 
+export type ContextAppSetting = AppSetting & {
+  initial: boolean
+}
 export interface IPlaygroundContext {
   files: IFiles
   filesHash: string
@@ -72,11 +76,13 @@ export interface IPlaygroundContext {
   selectedFileName: string
   setSelectedFileName: (fileName: string) => void
   setTheme: (theme: ITheme) => void
-  setFiles: (files: IFiles) => void
+  setFiles: (files: any) => void
   addFile: (fileName: string) => void
   removeFile: (fileName: string) => void
   updateFileName: (oldFieldName: string, newFieldName: string) => void
   changeTheme: (theme: ITheme) => void
+  appSetting: ContextAppSetting
+  setAppSetting: (setting: Partial<ContextAppSetting>) => Promise<void>
 }
 
 export interface IPreviewData {

@@ -12,6 +12,7 @@ import * as reactRouterDom from 'react-router-dom'
 import sinon from 'sinon'
 
 import 'amis/lib/themes/cxd.css'
+import 'amis/lib/helper.css'
 
 const dependencies = {
   react: React,

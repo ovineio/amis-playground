@@ -1,4 +1,5 @@
 import { saveAs } from 'file-saver'
+import { isPlainObject } from 'lodash'
 
 import AmisLogo from './icons/amis-logo.png'
 import DownloadSvg from './icons/download.svg?raw'
@@ -8,9 +9,10 @@ import ShareSvg from './icons/share.svg?raw'
 import SuccessSvg from './icons/success.svg?raw'
 import SunSvg from './icons/sun.svg?raw'
 
+import * as caseService from '@/localServer/caseService'
 import eslintrc from '@/Playground/templateAmis/.eslintrc.cjs?raw'
 import gitignore from '@/Playground/templateAmis/.gitignore?raw'
-import { IMPORT_MAP_FILE_NAME } from '@/Playground/templateAmis/files'
+import { IMPORT_MAP_FILE_NAME, initFiles } from '@/Playground/templateAmis/files'
 import index from '@/Playground/templateAmis/index.html?raw'
 import pkg from '@/Playground/templateAmis/package.json?raw'
 import readme from '@/Playground/templateAmis/README.md?raw'
@@ -18,6 +20,7 @@ import tsconfig from '@/Playground/templateAmis/tsconfig.json?raw'
 import tsconfigNode from '@/Playground/templateAmis/tsconfig.node.json?raw'
 import config from '@/Playground/templateAmis/vite.config.js?raw'
 import type { IFiles } from '@/Playground/types'
+import { utoa } from '@/Playground/utils'
 
 export const icons = {
   DownloadSvg,
@@ -27,6 +30,56 @@ export const icons = {
   ShareSvg,
   SunSvg,
   SuccessSvg,
+}
+
+export const getCaseFiles = async (caseId: string, version: number, pristine = false) => {
+  if (!caseId || !version) {
+    return {}
+  }
+  const { files: savedFiles, ...rest } = await caseService.getCaseFiles(caseId, version, pristine)
+  if (!savedFiles) {
+    return initFiles
+  }
+
+  const filesMap = {}
+  Object.entries(savedFiles).forEach(([key, value]) => {
+    filesMap[key] = value
+    if (value === true) {
+      filesMap[key] = initFiles[key]
+    }
+  })
+
+  return {
+    files: filesMap,
+    ...rest,
+  }
+}
+
+export const setCaseFiles = async (
+  caseId: string,
+  caseVersion: number,
+  files: any,
+  pristine = false,
+  overwrite?: boolean
+) => {
+  if (!caseId || !caseVersion) {
+    return {}
+  }
+
+  const filesHash = isPlainObject(files) ? utoa(JSON.stringify(files)) : files
+  const overwritePristine =
+    typeof overwrite === 'undefined'
+      ? caseService.isUserCreatedCase(caseId) && `${caseVersion}` === '1'
+      : overwrite
+  const result = await caseService.setCaseFiles({
+    caseId,
+    caseVersion,
+    filesHash,
+    pristine,
+    overwritePristine,
+  })
+
+  return result
 }
 
 export async function downloadFiles(files: IFiles) {

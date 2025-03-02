@@ -85,37 +85,40 @@ export const usePreviewComponent = (
     const startTime = performance.now();
     setBundling(true);
 
-    (async () => {
-      try {
-        const bundledCode = await bundle(files, id);
-        if (canceled || !bundledCode) {
-          return;
+    if (files.length) {
+      (async () => {
+        try {
+          const bundledCode = await bundle(files, id);
+          if (canceled || !bundledCode) {
+            return;
+          }
+          setBundling(false);
+          // There should be only one file after bundle though
+          debug(
+            `Bundled code in ${(performance.now() - startTime).toFixed()}ms: `,
+            { bundledCode }
+          );
+          const El = generatePreviewComponent(
+            id,
+            {
+              input: bundledCode,
+              scope: { require },
+            },
+            setError
+          );
+          if (El) {
+            setError(null);
+            setPreview(() => El);
+          }
+        } catch (err) {
+          if (canceled) {
+            return;
+          }
+          setError(err);
         }
-        setBundling(false);
-        // There should be only one file after bundle though
-        debug(
-          `Bundled code in ${(performance.now() - startTime).toFixed()}ms: `,
-          { bundledCode }
-        );
-        const El = generatePreviewComponent(
-          id,
-          {
-            input: bundledCode,
-            scope: { require },
-          },
-          setError
-        );
-        if (El) {
-          setError(null);
-          setPreview(() => El);
-        }
-      } catch (err) {
-        if (canceled) {
-          return;
-        }
-        setError(err);
-      }
-    })();
+      })();
+    }
+
     return () => {
       canceled = true;
     };

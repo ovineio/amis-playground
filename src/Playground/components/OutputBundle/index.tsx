@@ -33,11 +33,15 @@ const propsAreEqual = (prevProps: IOutput, nextProps: IOutput) => {
   return isSame
 }
 
-const A: React.FC<IOutput> = (props) => {
+const OutputBundle: React.FC<IOutput> = (props) => {
   const { files } = props
 
   const filesArr = useMemo(() => {
     const appFile = files[MAIN_FILE_NAME]
+    if (!appFile) {
+      return []
+    }
+
     const result = [
       {
         filename: appFile.name,
@@ -74,4 +78,4 @@ const A: React.FC<IOutput> = (props) => {
   )
 }
 
-export const Output = React.memo(A, propsAreEqual)
+export const Output = React.memo(OutputBundle, propsAreEqual)

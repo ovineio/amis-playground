@@ -20,7 +20,7 @@ interface Props {
 
 export const Editor: React.FC<Props> = (props) => {
   const { file, onChange, options } = props
-  const { theme, files, setSelectedFileName } = useContext(PlaygroundContext)
+  const { files, setAppSetting, appSetting } = useContext(PlaygroundContext)
   const editorRef = useRef<any>(null)
   const { doOpenEditor, loadJsxSyntaxHighlight, autoLoadExtraLib } = useEditor()
   const jsxSyntaxHighlightRef = useRef<any>({ highlighter: null, dispose: null })
@@ -53,14 +53,16 @@ export const Editor: React.FC<Props> = (props) => {
     editor._codeEditorService.doOpenEditor = function (editor: any, input: any) {
       const path = input.resource.path
       if (!path.startsWith('/node_modules/')) {
-        setSelectedFileName(path.replace('/', ''))
+        setAppSetting({
+          activeFileTab: path.replace('/', ''),
+        })
         doOpenEditor(editor, input)
       }
     }
     // 加载jsx高亮
     jsxSyntaxHighlightRef.current = loadJsxSyntaxHighlight(editor, monaco)
 
-    // 加载类型定义文件 
+    // 加载类型定义文件
     // 咱不支持，后续可优化
     // autoLoadExtraLib(editor, monaco, file.value, onWatch)
   }
@@ -75,7 +77,7 @@ export const Editor: React.FC<Props> = (props) => {
       <MonacoEditor
         className='react-playground-editor'
         height='100%'
-        theme={`vs-${theme}`}
+        theme={`vs-${appSetting.theme}`}
         path={file.name}
         language={file.language}
         value={file.value}

@@ -15,8 +15,7 @@ import type { IFileSelector } from '@/Playground/types'
 
 export const FileSelector: React.FC<IFileSelector> = (props) => {
   const { onChange, onError, readOnly = false } = props
-  const { files, removeFile, addFile, updateFileName, selectedFileName } =
-    useContext(PlaygroundContext)
+  const { files, removeFile, addFile, updateFileName, appSetting } = useContext(PlaygroundContext)
   const [tabs, setTabs] = useState([''])
   const [creating, setCreating] = useState(false)
 
@@ -84,7 +83,7 @@ export const FileSelector: React.FC<IFileSelector> = (props) => {
         <FileItem
           key={index + item}
           value={item}
-          actived={selectedFileName === item}
+          actived={appSetting.activeFileTab === item}
           creating={creating}
           readOnlyTabs={readOnly ? tabs : [MAIN_FILE_NAME]}
           onValidate={handleValidateTab}

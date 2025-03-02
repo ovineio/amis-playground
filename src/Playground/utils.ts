@@ -1,7 +1,8 @@
 import { strFromU8, strToU8, unzlibSync, zlibSync } from 'fflate'
 
-import { IMPORT_MAP_FILE_NAME, reactTemplateFiles } from './templateAmis/files'
+import { IMPORT_MAP_FILE_NAME, reactTemplateFiles, initFiles } from './templateAmis/files'
 import { ICustomFiles, IImportMap, ITheme } from './types'
+import * as caseService from '../localServer/caseService'
 
 import type { IFiles } from './types'
 
@@ -37,6 +38,14 @@ export function atou(base64: string): string {
   // old unicode hacks for backward compatibility
   // https://base64.guru/developers/javascript/examples/unicode-strings
   return decodeURIComponent(escape(binary))
+}
+
+export function json2hash(json: any): string {
+  return utoa(JSON.stringify(json))
+}
+
+export function hash2json(hash: string): any {
+  return JSON.parse(atou(hash))
 }
 
 const STORAGE_DARK_THEME = 'react-playground-prefer-dark'
@@ -110,18 +119,18 @@ export const getMergedCustomFiles = (files?: ICustomFiles, importMap?: IImportMa
   }
 }
 
-// 从url hash中获取files
-export const getFilesFromUrl = () => {
-  let files: IFiles | undefined
+// 从url query 中获取files
+export const getFilesHashFromUrl = () => {
+  let filesHash: string | undefined
   try {
     if (typeof window !== 'undefined') {
-      const hash = window.location.hash
-      if (hash) files = JSON.parse(atou(hash?.split('#')[1]))
+      const query = new URLSearchParams(location.search)
+      filesHash = decodeURIComponent(query.get('share') || '')
     }
   } catch (error) {
     console.error(error)
   }
-  return files
+  return filesHash
 }
 
 // 根据文件名后缀匹配文件类型
@@ -132,29 +141,4 @@ export const fileName2Language = (name: string) => {
   if (['json'].includes(suffix)) return 'json'
   if (['css'].includes(suffix)) return 'css'
   return 'javascript'
-}
-
-export const generateRandomString = (length = 10) => {
-  const charactersLength = Math.ceil(length / 2)
-  const numbersLength = length - charactersLength
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-  const numbers = '0123456789'
-  let randomString = ''
-
-  for (let i = 0; i < charactersLength; i++) {
-    const randomIndex = Math.floor(Math.random() * characters.length)
-    randomString += characters.charAt(randomIndex)
-  }
-
-  for (let i = 0; i < numbersLength; i++) {
-    const randomIndex = Math.floor(Math.random() * numbers.length)
-    randomString += numbers.charAt(randomIndex)
-  }
-
-  randomString = randomString
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('')
-
-  return randomString
 }

@@ -66,8 +66,8 @@ export const Header: React.FC = () => {
       renderAmis(
         {
           type: 'form',
-          componentId: 'shareForm',
-          debug: true,
+          id: 'shareForm',
+          // debug: true,
           mode: 'horizontal',
           wrapWithPanel: false,
           body: [
@@ -79,13 +79,13 @@ export const Header: React.FC = () => {
               placeholder: '请输入标题',
               required: true,
             },
-            {
-              type: 'switch',
-              label: '使用短链接',
-              onText: '是',
-              offText: '否',
-              name: 'useShortUrl',
-            },
+            // {
+            //   type: 'switch',
+            //   label: '使用短链接',
+            //   onText: '是',
+            //   offText: '否',
+            //   name: 'useShortUrl',
+            // },
             {
               type: 'select',
               name: 'expiryDays',
@@ -129,7 +129,8 @@ export const Header: React.FC = () => {
         {
           data: {
             title: appSetting.shareTitle,
-            useShortUrl: appSetting.shareConfig?.useShortUrl || false,
+            // useShortUrl: appSetting.shareConfig?.useShortUrl || false,
+            useShortUrl: false,
             expiryDays: appSetting.shareConfig?.expiryDays || 90,
           },
           scopeRef: (ref) => {

@@ -77,12 +77,12 @@ const ReactPlayground = (props: IPlayground) => {
     let caseId = appSetting.caseId || 'baseSimple'
     let caseVersion = appSetting.caseVersion || 1
 
-    const { shareId, shareContent } = await getShareFormUrl()
-    if (shareId && shareContent) {
+    const { shareId, share, title } = await getShareFormUrl()
+    if (shareId && share) {
       caseId = defCaseId.myShare
-      const checkInfo = await checkFilesChangeByVerId(shareContent, caseId, shareId)
+      const checkInfo = await checkFilesChangeByVerId(share, caseId, shareId)
 
-      const getVerDefLabel = () => `T-${moment().format('YYMMDD-hh:mm:ss')}`
+      const getVerDefLabel = () => title || `${moment().format('YYMMDD-hh:mm:ss')}`
 
       // 不存在新版本
       if (checkInfo.versionNotFound) {
@@ -91,7 +91,7 @@ const ReactPlayground = (props: IPlayground) => {
         await setCaseFiles({
           caseId,
           caseVersion,
-          filesHash: shareContent,
+          filesHash: share,
           pristine: true,
           overwritePristine: true,
         })

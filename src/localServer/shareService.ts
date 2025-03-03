@@ -125,18 +125,21 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
 export const getShareFormUrl = async () => {
   const urlQuery = new URLSearchParams(location.search)
   const shareId = urlQuery.get('shareId') || ''
-  const shareContent = decodeURIComponent(urlQuery.get('share') || '')
+  const title = decodeURIComponent(urlQuery.get('title') || '')
+  const share = decodeURIComponent(urlQuery.get('share') || '')
 
-  if (shareId || shareContent) {
+  if (shareId || share) {
     // 删除分享参数
     urlQuery.delete('share')
     urlQuery.delete('shareId')
+    urlQuery.delete('title')
     const newUrl = location.origin + location.pathname + '?' + urlQuery.toString()
     history.replaceState({}, '', newUrl)
   }
 
   return {
+    title,
     shareId,
-    shareContent,
+    share,
   }
 }

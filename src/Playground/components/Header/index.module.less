@@ -9,7 +9,6 @@
   box-sizing: border-box;
   align-items: center;
   border-bottom: 1px solid var(--border);
-  justify-content: space-between;
 
   .logo {
     display: flex;
@@ -21,10 +20,11 @@
       margin-right: 10px;
     }
   }
-
+  
   .links {
     display: flex;
     height: 100%;
+    margin-left: auto;
 
     button {
       display: flex;
@@ -46,6 +46,29 @@
     button.theme > svg {
       width: 18px;
       height: 18px;
+    }
+  }
+}
+
+
+.actions {
+  margin-left: 20px;
+
+  :global {
+    .cxd-Spinner {
+      display: none;
+    }
+    .cxd-Form-item {
+      margin-bottom: 0;
+    }
+    .cxd-TreeSelectControl > .cxd-TreeSelect-popover {
+      width: auto;
+    }
+    .cxd-Tree-itemArrow {
+      margin-right: 0;
+    }
+    .cxd-Tree-itemLabel-item {
+      padding-left: 0;
     }
   }
 }

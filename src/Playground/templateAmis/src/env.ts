@@ -13,7 +13,6 @@ import { matchPath } from "react-router-dom";
 const __ = makeTranslator('zh');
 
 const env = {
-  session: "playground",
   updateLocation: (location, replace) => {
     console.log('updateLocation', {
       type: replace ? "replace" : "push",
@@ -52,7 +51,7 @@ const env = {
   fetcher: async (api) => {
     let { url, method, data, responseType, config, headers } = api;
     config = config || {};
-    // 如果在 gh-pages 里面
+
     if (typeof url === "string" && url.startsWith("/amis/")) {
       url = url.replace(/^\/amis\//, "https://aisuda.bce.baidu.com/amis/");
     }

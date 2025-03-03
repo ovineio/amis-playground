@@ -50,11 +50,12 @@ const dpasteService = {
   },
 }
 
-let shareCache = {
+const shareCache = {
   share: '',
   title: '',
   shareId: '',
   shortUrl: '',
+  expiryDays: 90,
 }
 type ShareOptions = {
   share: string
@@ -79,13 +80,45 @@ const getShareFullUrl = (options: ShareOptions & { shareId: string }) => {
   const fullUrl = getUrlPath(shareQueryStr)
   return fullUrl
 }
+
+const getShareShortUrl = async (options: ShareOptions & { shareId: string }) => {
+  let shortUrl = ''
+  try {
+    shortUrl = await dpasteService.shareProject({
+      ...options,
+      shareId: options.shareId,
+      expiryDays: options.expiryDays,
+    })
+  } catch (err) {
+    console.log('dpasteService.shareProject err', err)
+  }
+  return shortUrl
+}
+
 export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> => {
-  // 优化连续多次点击分享，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
-  if (!anyChanged(['share', 'title'], shareCache, options)) {
+  const { useShortUrl } = options
+  /**
+   * 优化连续多次点击分享，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
+   * 如果 “share” 分享的文件内容不变，则使用缓存的 shareId，进行优化
+   */
+  if (!anyChanged(['share'], shareCache, options)) {
+    let shortUrl = ''
+    if (useShortUrl) {
+      shortUrl = shareCache.shortUrl
+      // 如果 title｜expiryDays 变化，使用 cache 的 shareId 进行创建短链
+      if (anyChanged(['title', 'expiryDays'], shareCache, options)) {
+        shortUrl = await getShareShortUrl({
+          ...options,
+          shareId: shareCache.shareId,
+        })
+      }
+    }
+
     const fullUrl = getShareFullUrl(shareCache)
     return {
       fullUrl,
-      shortUrl: shareCache.shortUrl,
+      shortUrl,
+      isShortUrlErr: useShortUrl && !shortUrl,
     }
   }
 
@@ -96,29 +129,25 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
   })
 
   let shortUrl = ''
-  if (options.useShortUrl) {
-    try {
-      shortUrl = await dpasteService.shareProject({
-        ...options,
-        shareId,
-        expiryDays: options.expiryDays,
-      })
-    } catch (err) {
-      console.log('dpasteService.shareProject err', err)
-    }
+  if (useShortUrl) {
+    shortUrl = await getShareShortUrl({
+      ...options,
+      shareId,
+    })
   }
 
-  shareCache = {
+  Object.assign(shareCache, {
     title: options.title,
+    expiryDays: options.expiryDays || 90,
     share: options.share,
     shareId,
     shortUrl,
-  }
+  })
 
   return {
     fullUrl,
     shortUrl,
-    isShortUrlErr: options.useShortUrl && !shortUrl,
+    isShortUrlErr: useShortUrl && !shortUrl,
   }
 }
 

@@ -49,7 +49,6 @@ specifiers:
   monaco-jsx-syntax-highlight: ^1.2.0
   prettier: ^3.0.3
   react: ^18.2.0
-  react-copy-to-clipboard: ^5.1.0
   react-dom: ^18.2.0
   react-router: 5.2.1
   react-router-dom: 5.3.0
@@ -91,7 +90,6 @@ dependencies:
   monaco-editor: 0.43.0
   monaco-jsx-syntax-highlight: 1.2.0
   react: 18.2.0
-  react-copy-to-clipboard: 5.1.0_react@18.2.0
   react-dom: 18.2.0_react@18.2.0
   react-router: 5.2.1_react@18.2.0
   react-router-dom: 5.3.0_react@18.2.0
@@ -4771,16 +4769,6 @@ packages:
       react: 18.2.0
       reactcss: 1.2.3_react@18.2.0
       tinycolor2: 1.6.0
-    dev: false
-
-  /react-copy-to-clipboard/5.1.0_react@18.2.0:
-    resolution: {integrity: sha512-k61RsNgAayIJNoy9yDsYzDe/yAZAzEbEgcz3DZMhF686LEyukcE1hzurxe85JandPUG+yTfGVFzuEw3xt8WP/A==}
-    peerDependencies:
-      react: ^15.3.0 || 16 || 17 || 18
-    dependencies:
-      copy-to-clipboard: 3.3.1
-      prop-types: 15.8.1
-      react: 18.2.0
     dev: false
 
   /react-cropper/2.3.3_react@18.2.0:

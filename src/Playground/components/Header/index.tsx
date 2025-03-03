@@ -1,14 +1,15 @@
 import { toast, prompt, confirm, alert } from 'amis-ui'
-import React, { useContext, useRef, useState } from 'react'
 import copy from 'copy-to-clipboard'
+import React, { useContext, useRef, useState } from 'react'
+
 import { SelectCase } from './SelectCase'
 import { downloadFiles, icons } from './utils'
 import { renderAmis } from '../Amis'
 
 import styles from './index.module.less'
 
-import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 import { getShareUrl } from '@/localServer/shareService'
+import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 
 export const Header: React.FC = () => {
   const { files, appSetting, filesHash, changeTheme, setAppSetting } = useContext(PlaygroundContext)
@@ -20,8 +21,8 @@ export const Header: React.FC = () => {
     shareFormRef: {},
   })
 
-  const handleShare = async (context, doAction, event) => {
-    const { title, useShortUrl, expiryDays } = event.data
+  const handleShare = async (data = {}) => {
+    const { title, useShortUrl, expiryDays } = data
     const { fullUrl, shortUrl, isShortUrlErr } = await getShareUrl({
       title,
       useShortUrl,
@@ -62,9 +63,18 @@ export const Header: React.FC = () => {
   }
 
   const handleCopy = async () => {
-    const isConfirm = await confirm(
-      renderAmis(
-        {
+    storeRef.current.shareFormRef.doAction({
+      actionType: 'dialog',
+      data: {
+        title: appSetting.shareTitle,
+        // useShortUrl: appSetting.shareConfig?.useShortUrl || false,
+        useShortUrl: false,
+        expiryDays: appSetting.shareConfig?.expiryDays || 90,
+      },
+      dialog: {
+        title: '分享代码',
+        id: 'shareDialog',
+        body: {
           type: 'form',
           id: 'shareForm',
           // debug: true,
@@ -120,39 +130,39 @@ export const Header: React.FC = () => {
               actions: [
                 {
                   actionType: 'custom',
-                  script: handleShare,
+                  script: async (context, doAction, event) => {
+                    try {
+                      await handleShare(event.data)
+                      doAction([
+                        {
+                          actionType: 'close',
+                          componentId: 'shareDialog',
+                        },
+                      ])
+                    } catch (err) {
+                      console.log('handleShare err', err)
+                    }
+                  },
                 },
               ],
             },
           },
         },
-        {
-          data: {
-            title: appSetting.shareTitle,
-            // useShortUrl: appSetting.shareConfig?.useShortUrl || false,
-            useShortUrl: false,
-            expiryDays: appSetting.shareConfig?.expiryDays || 90,
+        actions: [
+          {
+            type: 'action',
+            label: '取消',
+            actionType: 'close',
           },
-          scopeRef: (ref) => {
-            storeRef.current.shareFormRef = ref
+          {
+            type: 'action',
+            label: '分享',
+            level: 'primary',
+            actionType: 'validate',
           },
-        }
-      ),
-      '分享代码',
-      {
-        confirmBtnLevel: 'primary',
-        confirmText: '分享',
-      }
-    )
-
-    if (isConfirm) {
-      storeRef.current.shareFormRef.doAction([
-        {
-          actionType: 'validate',
-          componentId: 'shareForm',
-        },
-      ])
-    }
+        ],
+      },
+    })
   }
 
   const downloadProject = () => {
@@ -167,6 +177,11 @@ export const Header: React.FC = () => {
 
   return (
     <nav className={styles.header}>
+      {renderAmis('', {
+        scopeRef: (ref) => {
+          storeRef.current.shareFormRef = ref
+        },
+      })}
       <a target='_blank' href='https://github.com/ovineio/amis-playground'>
         <div className={styles.logo}>
           <img alt='logo' src={icons.AmisLogo} />

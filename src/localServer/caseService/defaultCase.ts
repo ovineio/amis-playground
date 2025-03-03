@@ -1,6 +1,20 @@
 // import { mapTree } from 'amis-core'
 
-export const defaultCaseTree = [
+export type CaseTreeSchema = {
+  label: string
+  value: string
+  version?: string
+  disabled?: boolean
+  children?: CaseTreeSchema[]
+}
+
+export const defCaseId = {
+  myShare: 'myShare',
+  myCase: 'myCase',
+  myCustomBase: 'myCustomBase',
+}
+
+export const defaultCaseTree: CaseTreeSchema[] = [
   {
     label: 'amis示例',
     value: 'amisCase',
@@ -22,18 +36,18 @@ export const defaultCaseTree = [
   },
   {
     label: '我的示例',
-    value: 'myCase',
+    value: defCaseId.myCase,
     disabled: true,
     children: [
       {
         label: '案例1',
-        value: 'myCustomBase',
+        value: defCaseId.myCustomBase,
       },
     ],
   },
   {
     label: '来自分享',
-    value: 'myShare',
+    value: defCaseId.myShare,
     disabled: true,
     children: [],
   },

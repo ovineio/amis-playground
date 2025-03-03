@@ -67,7 +67,8 @@ export type IPlayground = {
   ISplitPane
 
 export type ContextAppSetting = AppSetting & {
-  initial: boolean
+  initial?: boolean
+  shareTitle?: string
 }
 export interface IPlaygroundContext {
   files: IFiles

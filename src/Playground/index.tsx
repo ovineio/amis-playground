@@ -100,11 +100,17 @@ const ReactPlayground = (props: IPlayground) => {
         const isConfirm = await confirm(
           `
           您已浏览过当前分享的代码，并进行了修改。<br/>
-          是否丢弃已修改的代码，重置为当前分享代码？<br/>
-          <span class="text-mute mt-2">tips: 如果您不想丢弃修改的代码，可以先进行“取消”操作，再将修改过后的代码，进行“新建版本”保存之后。再打开该分享链接即可。</span>`,
+          <div class="font-bold">是否丢弃已修改的代码，重置为当前分享代码？</div><br/>
+          <div class="text-muted">
+            tips: 如果您不想丢弃修改的代码，可按如下步骤操作：
+            <br/> 1.进行“取消”操作，将改动代码，进行“新建”版本保存。
+            <br/> 2.再次打开该分享链接。
+          </div>`,
           '提示',
-          '重置',
-          '取消'
+          {
+            confirmBtnLevel: 'primary',
+            confirmText: '重置',
+          }
         )
         if (isConfirm) {
           caseVersion = checkInfo.version!
@@ -112,7 +118,7 @@ const ReactPlayground = (props: IPlayground) => {
             caseId,
             caseVersion,
             versionLabel: getVerDefLabel(),
-            filesHash: shareContent,
+            filesHash: share,
             pristine: true,
             overwritePristine: true,
           })

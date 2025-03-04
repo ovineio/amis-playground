@@ -1,3 +1,4 @@
+import { alert, confirm } from 'amis-ui'
 import moment from 'moment'
 import React, { useContext, useEffect } from 'react'
 
@@ -8,18 +9,15 @@ import { Output as OutputBundle } from './components/OutputBundle'
 import { SplitPane } from './components/SplitPane'
 import { PlaygroundContext, PlaygroundProvider } from './PlaygroundContext'
 import { MAIN_FILE_NAME } from './templateAmis/files'
-import {
-  getCustomActiveFile,
-  getFilesHashFromUrl,
-  getMergedCustomFiles,
-  getPlaygroundTheme,
-} from './utils'
+import { getCustomActiveFile, getMergedCustomFiles, getPlaygroundTheme } from './utils'
 
 import type { IPlayground } from './types'
 
 import './index.less'
-import { addNewVersion, initCaseTree } from '@/localServer/caseService'
+import { addNewVersion, initCaseTree, checkFilesChangeByVerId, updateVersionLabel } from '@/localServer/caseService'
+import { defCaseId } from '@/localServer/caseService/defaultCase'
 import { getAppSetting } from '@/localServer/settingService'
+import { getShareFormUrl } from '@/localServer/shareService'
 
 const defaultCodeSandboxOptions = {
   theme: 'dark',
@@ -79,17 +77,61 @@ const ReactPlayground = (props: IPlayground) => {
     let caseId = appSetting.caseId || 'baseSimple'
     let caseVersion = appSetting.caseVersion || 1
 
-    const shareFilesHash = getFilesHashFromUrl()
-    if (shareFilesHash) {
-      caseId = 'myShare'
-      caseVersion = await addNewVersion(caseId, `T-${moment().format('YYMMDD-hh:mm:ss')}`)
-      await setCaseFiles(caseId, caseVersion, shareFilesHash, true)
+    const shareData = await getShareFormUrl()
 
-      // 删除 share 参数
-      const urlQuery = new URLSearchParams(location.search)
-      urlQuery.delete('share')
-      const newUrl = location.origin + location.pathname + '?' + urlQuery.toString()
-      history.replaceState({}, '', newUrl)
+    if (shareData?.isShortUrlExpired) {
+      alert('当前打开的分享链接已过期', '提示')
+    } else if (shareData) {
+      const { share, title, shareId } = shareData
+      caseId = defCaseId.myShare
+      const checkInfo = await checkFilesChangeByVerId(share, caseId, shareId)
+
+      caseVersion = checkInfo.version!
+
+      const getVerDefLabel = () => title || `${moment().format('YYMMDD-hh:mm:ss')}`
+
+      // 不存在新版本
+      if (checkInfo.versionNotFound) {
+        // 直接添加新版本
+        caseVersion = await addNewVersion(caseId, getVerDefLabel(), shareId)
+        await setCaseFiles({
+          caseId,
+          caseVersion,
+          filesHash: share,
+          pristine: true,
+          overwritePristine: true,
+        })
+      } else if (checkInfo.filesChanged) {
+        // 如果修改过分享的代码,弹出变更覆盖确认框。在用户选择中做修改
+        const isConfirm = await confirm(
+          `
+          您已浏览过当前分享的代码，并进行了修改。<br/>
+          <div class="font-bold pt-1">是否丢弃已修改的代码，重置为当前分享的代码？</div><br/>
+          <div class="text-muted">
+            tips: 如果您不想丢弃修改的代码，可按如下步骤操作：
+            <br/> 1.进行“取消”操作，将已改动的代码，进行“新建”版本保存。
+            <br/> 2.再次打开该分享链接。
+          </div>`,
+          '提示',
+          {
+            confirmBtnLevel: 'primary',
+            confirmText: '重置',
+          }
+        )
+        if (isConfirm) {
+          await setCaseFiles({
+            caseId,
+            caseVersion,
+            versionLabel: getVerDefLabel(),
+            filesHash: share,
+            pristine: true,
+            overwritePristine: true,
+          })
+        }
+      } else {
+        // 代码相同时，调整版本label
+        await updateVersionLabel(caseId, caseVersion, getVerDefLabel())
+      }
     }
 
     if (caseId && caseVersion) {
@@ -100,7 +142,7 @@ const ReactPlayground = (props: IPlayground) => {
       }
     }
 
-    setAppSetting({
+    await setAppSetting({
       initial: true,
       ...appSetting,
     })

@@ -1,3 +1,5 @@
+// app 设置
+
 import { set, get, update, setMany, getMany, del, delMany } from 'idb-keyval'
 
 const dbKey = {
@@ -9,7 +11,11 @@ export type AppSetting = {
   caseVersion: number
   splitPanelWidth: number
   activeFileTab: string
-  theme: string
+  theme: string,
+  shareConfig: {
+    useShortUrl: string
+    expiryDays: number
+  }
 }
 
 export const getAppSetting = async (): Promise<Partial<AppSetting>> => {

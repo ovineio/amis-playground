@@ -1,266 +1,23 @@
-import { findTree, mapTree, registerFilter } from 'amis-core'
-import { get } from 'lodash'
-import { useContext, useEffect, useRef } from 'react'
+import { findTree, uuidv4 } from 'amis-core'
+import { confirm } from 'amis-ui'
+import { get, last } from 'lodash'
+import { useContext, useRef } from 'react'
 
-import { getCaseFiles, setCaseFiles } from '../utils'
+import { checkCaseValid, getNewVersionDialog } from './utils'
+import { doAmisAction, setAmisValue } from '../../Amis/utils'
+import { getCaseFiles, setCaseFiles, setCaseFiles2Pristine } from '../utils'
+
+import styles from './index.module.less'
 
 import {
+  caseType,
   delCaseVersion,
   getCasesTree,
   getCaseVersions,
-  isUserCreatedCase,
-  setCaseVersions,
   updateCaseTree,
 } from '@/localServer/caseService'
 import { renderAmis } from '@/Playground/components/Amis'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
-
-const getVersionUpdateAction = (options = {}) => {
-  const { changeByCaseId = false } = options
-
-  const actionConfig = {
-    actionType: 'custom',
-    script: async (context, doAction, event) => {
-      const { caseId, caseVersion } = event.data
-
-      if (!caseId) {
-        return
-      }
-
-      const versions = await getCaseVersions(caseId)
-      const maxVersion = Math.max(...versions.map((item) => item.value))
-      const options = versions
-        .concat(
-          // 分享不允许 增加版本
-          caseId === 'myShare'
-            ? []
-            : [
-                {
-                  value: maxVersion + 1,
-                  desc: '',
-                },
-              ]
-        )
-        .map((item) => {
-          return {
-            value: item.value,
-            label: `V${item.value}`,
-            desc: item.desc || item.label,
-          }
-        })
-
-      const defaultVer = get(versions, `0.value`) || ''
-      const newValue = {
-        caseVersion: changeByCaseId ? defaultVer : caseVersion || defaultVer,
-        caseVersionOptions: options,
-      }
-
-      doAction([
-        {
-          actionType: 'setValue',
-          componentId: 'newVersionForm',
-          args: {
-            value: newValue,
-          },
-        },
-      ])
-    },
-  }
-
-  return actionConfig
-}
-
-const getNewVersionDialog = (options = {}) => {
-  const { filesHash, setCurrVerPristine } = options
-  const dialogConfig = {
-    title: '新建示例',
-    body: {
-      type: 'form',
-      id: 'newVersionForm',
-      // debug: true,
-      onEvent: {
-        inited: {
-          actions: [getVersionUpdateAction()],
-        },
-        submitSucc: {
-          actions: [
-            {
-              actionType: 'setValue',
-              componentId: 'casePickerForm',
-              args: {
-                value: {
-                  caseId: '${caseId}',
-                  caseVersion: '${caseVersion}',
-                },
-              },
-            },
-            {
-              actionType: 'reload',
-              componentId: 'casePicker_caseId',
-            },
-            {
-              actionType: 'reload',
-              componentId: 'casePicker_caseVersion',
-            },
-          ],
-        },
-      },
-      api: {
-        url: '/',
-        dataProvider: async (req) => {
-          const { versionDsc, caseVersionOptions, caseId, caseVersion } = req.data
-
-          const newVersions = caseVersionOptions.flatMap((item) => {
-            const newItem = {
-              value: item.value,
-            }
-            if (item.value === caseVersion) {
-              newItem.label = versionDsc
-            } else {
-              newItem.label = item.desc
-            }
-
-            return newItem.label ? [newItem] : []
-          })
-
-          await setCaseVersions(caseId, newVersions)
-          const { pristineFilesHash } = await setCaseFiles(
-            caseId,
-            caseVersion,
-            filesHash,
-            true,
-            true
-          )
-          const resData = await setCurrVerPristine(caseId, caseVersion, pristineFilesHash)
-
-          return {
-            data: {
-              data: resData,
-            },
-          }
-        },
-      },
-      body: [
-        {
-          type: 'tree-select',
-          name: 'caseId',
-          clearable: true,
-          required: true,
-          creatable: true,
-          removable: true,
-          editable: true,
-          rootCreatable: false,
-          label: '示例',
-          searchable: true,
-          placeholder: '请选择示例',
-          className: 'mr-0',
-          onlyLeaf: true,
-          enableDefaultIcon: false,
-          deleteConfirmText: '删除该示例，将会同时删除该示例各个版本所保存的代码。请谨慎删除！',
-          source: {
-            url: '/',
-            dataProvider: async () => {
-              const caseTree = await getCasesTree()
-              const options = mapTree(caseTree, (item) => {
-                const userCreated = isUserCreatedCase(item.value)
-                return {
-                  ...item,
-                  // hidden: item.value === 'myShare',
-                  disabled: item.value === 'myCase' ? false : item.disabled,
-                  creatable: userCreated || item.value.startsWith('my'),
-                  editable: userCreated || item.value === 'myCustomBase',
-                  removable: userCreated,
-                }
-              })
-
-              return {
-                data: options,
-              }
-            },
-          },
-          addApi: {
-            url: '/',
-            dataProvider: async (req) => {
-              await updateCaseTree('addChild', req.data)
-              return {
-                data: {},
-              }
-            },
-          },
-          editApi: {
-            url: '/',
-            dataProvider: async (req) => {
-              await updateCaseTree('edit', req.data)
-              return {
-                data: {},
-              }
-            },
-          },
-          deleteApi: {
-            url: '/',
-            data: { value: '${value}', caseId: '${caseId}' },
-            dataProvider: async (req) => {
-              await updateCaseTree('delete', req.data)
-              return {
-                data: {},
-              }
-            },
-          },
-          onEvent: {
-            change: {
-              actions: [getVersionUpdateAction({ changeByCaseId: true })],
-            },
-            deleteConfirm: {
-              expression: '${event.data.value === event.data.caseId}',
-              actions: [
-                {
-                  actionType: 'reset',
-                  componentId: 'newVersionForm',
-                },
-              ],
-            },
-          },
-        },
-        {
-          type: 'input-group',
-          label: '版本',
-          required: true,
-          body: [
-            {
-              type: 'select',
-              name: 'caseVersion',
-              required: true,
-              source: '${caseVersionOptions}',
-              autoFill: {
-                versionDsc: '${desc}',
-              },
-            },
-            {
-              type: 'input-text',
-              name: 'versionDsc',
-              required: true,
-              clearable: true,
-              placeholder: '请输入版本描述',
-            },
-          ],
-        },
-      ],
-    },
-  }
-
-  return dialogConfig
-}
-
-registerFilter('app_disabledCaseRemove', (data) => {
-  const { caseId, versionCount, caseVersion } = data
-
-  // 官方定义的示例，必须保留1个，并且v1不能被删（用于回退为官方示例）
-  const officialCheck = !isUserCreatedCase(caseId) && (versionCount <= 1 || caseVersion === 1)
-  // 分享的内容可以被被全部删除
-  const disableRemove = caseId === 'myShare' ? false : officialCheck
-
-  return !caseVersion || disableRemove
-})
 
 export const SelectCase = () => {
   const { appSetting, setFiles, setAppSetting, filesHash } = useContext(PlaygroundContext)
@@ -269,47 +26,294 @@ export const SelectCase = () => {
     scopeRef: any
     pristineFilesHash: string
     appSetting: any
+    caseChanged: boolean
+    isInitialSucc: boolean
   }>({
     scopeRef: null,
     pristineFilesHash: '',
     appSetting: {},
+    caseChanged: false,
+    isInitialSucc: false,
   })
 
   storeRef.current.appSetting = appSetting
+
   const caseEnable = appSetting.caseId && appSetting.caseVersion
 
-  const setAmisValue = (componentId, value) => {
-    storeRef.current.scopeRef.doAction([
-      {
-        actionType: 'setValue',
-        componentId,
-        args: {
-          value,
+  const amisData = Object.assign(
+    {
+      caseEnable,
+      resetDisable: storeRef.current.pristineFilesHash === filesHash,
+    },
+    {
+      caseId: appSetting.caseId,
+      caseVersion: appSetting.caseVersion,
+    }
+  )
+
+  const caseIdApiConfig = {
+    url: '/getCaseTree?caseId=${caseId}',
+    method: 'post',
+    data: {
+      __changeReason: '${__changeReason|pick:type}',
+      __prevCaseId: '${__prev|toJson|pick:caseId}',
+    },
+    requestAdaptor: (req) => {
+      storeRef.current.caseChanged = false // 关闭标记
+      return req
+    },
+    dataProvider: async (req) => {
+      let { caseId } = req.query
+
+      // start: 检验 caseId
+      const { validCaseItem, caseTree } = await checkCaseValid(caseId)
+      // 如果已经初始化过，（caseId 为空，是用户手动点击清除按钮）
+      if (storeRef.current.isInitialSucc && !caseId) {
+        doAmisAction(
+          storeRef,
+          {
+            type: 'setValue',
+            id: 'casePickerForm',
+            args: {
+              value: {
+                caseVersion: '',
+              },
+            },
+          },
+          {
+            type: 'reload', // 刷新 versions
+            id: 'casePicker_caseVersion',
+          }
+        )
+        return {
+          data: caseTree,
+        }
+      }
+      // 其他情况下，使用有效caseId
+      caseId = validCaseItem.value
+      // end
+
+      // start: 检验 caseVersion
+      // TODO: 优化此处，太容易出BUG了
+      const { __changeReason, __prevCaseId } = req.data
+      const formRef = storeRef.current.scopeRef.getComponentById('casePickerForm')
+      const formData = formRef?.emittedData || formRef?.props?.data || {}
+      let { caseVersion } = formData || {} // 获取当前最新的 caseVersion
+
+      const changeCaseId = __changeReason === 'input' && __prevCaseId !== caseId
+      const versions = await getCaseVersions(caseId)
+      const caseVersionErr = !versions.find((item) => item.value === caseVersion)
+      // 重置为第一个版本
+      if (changeCaseId || caseVersionErr) {
+        caseVersion = get(versions, '0.value')
+      }
+      // end
+
+      storeRef.current.caseChanged = true // 开启标记
+      storeRef.current.isInitialSucc = true // 标记初始化成功
+      doAmisAction(
+        storeRef,
+        {
+          type: 'setValue',
+          id: 'casePickerForm',
+          args: {
+            value: {
+              reloadId: uuidv4(), // 触发form change
+              caseId,
+              caseVersion,
+            },
+          },
         },
-      },
-    ])
+        {
+          type: 'reload', // 刷新 versions
+          id: 'casePicker_caseVersion',
+        }
+      )
+
+      return {
+        data: caseTree,
+      }
+    },
   }
 
-  const initCases = async () => {
-    const { caseId, caseVersion, initial } = appSetting
-    if (!initial) {
+  const caseVersionApiConfig = {
+    url: '/getCaseVersion',
+    method: 'post',
+    data: {
+      caseId: '${caseId}',
+    },
+    dataProvider: async (req) => {
+      const { caseId } = req.data
+      const versions = await getCaseVersions(caseId)
+      const options = versions.map((item) => ({
+        label: `V${item.value}: ${item.label}`,
+        value: item.value,
+        count: versions.length,
+      }))
+
+      return {
+        data: {
+          data: options,
+        },
+      }
+    },
+  }
+
+  const handleCaseChange = async (options) => {
+    const { data } = options
+
+    const { activeFileTab } = storeRef.current.appSetting
+    const { caseChanged } = storeRef.current
+    setAmisValue(storeRef, 'casePickerForm', {
+      resetDisableByNew: false,
+    })
+    if (!caseChanged) {
       return
     }
-    setAmisValue('casePickerForm', {
+
+    const { caseId, caseVersion } = data
+
+    if (!caseId || !caseVersion) {
+      return
+    }
+
+    // 切换时，如果没有设置，设置pristine
+    const { files = {}, filesHash } = await getCaseFiles({
       caseId,
       caseVersion,
+      withHash: true,
+    })
+    const { pristineFilesHash = '' } = await setCaseFiles({
+      caseId,
+      caseVersion,
+      filesHash,
+      pristine: true,
+      onlyPristine: true,
+      returnCaseInfo: true,
+      withHash: true,
+      withJson: false,
+    })
+
+    const fileName = files[activeFileTab]
+    await setAppSetting({
+      caseId,
+      caseVersion,
+      shareTitle: `${document.querySelector<HTMLSpanElement>('.casePicker_caseId .cxd-ResultBox-singleValue')
+          ?.innerText || '示例'
+        } @ ${document.querySelector<HTMLSpanElement>('.casePicker_caseVersion .cxd-Select-value')
+          ?.innerText || 'V1'
+        }`,
+      activeFileTab: fileName ? activeFileTab : Object.keys(files)[0],
+    })
+
+    storeRef.current.pristineFilesHash = pristineFilesHash
+    setFiles(files)
+  }
+
+  const setCurrVerPristine = async (
+    nextCaseId: string,
+    nextVersion: string,
+    nextPristineFilesHash: string
+  ) => {
+    const { caseId, caseVersion } = appSetting
+    if (caseId === nextCaseId && `${caseVersion}` === nextVersion) {
+      storeRef.current.pristineFilesHash = nextPristineFilesHash
+    } else {
+      // 还原上一个版本代码
+      await setCaseFiles2Pristine({
+        caseId,
+        caseVersion,
+      })
+    }
+    // 刚刚保存完新版本，直接将“重置”禁用
+    setAmisValue(storeRef, 'casePickerForm', {
+      resetDisableByNew: true,
     })
   }
 
-  useEffect(() => {
-    initCases()
-  }, [appSetting.initial])
+  const handleReset = async (options) => {
+    const { data } = options
+    const { caseId, caseVersion } = data
+    const { pristineFiles } = await getCaseFiles({
+      caseId,
+      caseVersion,
+      pristine: true,
+    })
+    setFiles(pristineFiles)
+  }
+
+  const handleDelete = async (options) => {
+    const { data } = options
+
+    const { caseId, caseVersion, versionCount } = data
+    const onlyVersion = versionCount <= 1
+    const newData: {
+      caseId?: string
+      caseVersion?: number
+    } = {}
+
+    if (onlyVersion) {
+      const { caseItem, firstValidCaseItem } = await checkCaseValid(caseId)
+      // 如果当前case存在子示例，则不删除
+      const hasChildCase = (caseItem?.children?.length || 0) > 0
+
+      // 用户创建的可以整个删除case
+      if (caseType.formUserCreated(caseId) && !hasChildCase) {
+        await updateCaseTree('delete', { value: caseId })
+      } else {
+        // 非用户创建的，只删除对应的版本即可
+        await delCaseVersion(caseId, caseVersion)
+      }
+
+      if (firstValidCaseItem) {
+        newData.caseId = firstValidCaseItem.value
+      }
+    } else {
+      await delCaseVersion(caseId, caseVersion)
+      const versions = await getCaseVersions(caseId)
+      // 默认回退到倒数第一个版本（符合使用习惯）
+      const newCaseVersion = last(versions)?.value
+      if (newCaseVersion) {
+        newData.caseVersion = newCaseVersion
+      }
+    }
+
+    doAmisAction(
+      storeRef,
+      {
+        type: 'setValue',
+        id: 'casePickerForm',
+        args: {
+          value: newData,
+        },
+      },
+      onlyVersion
+        ? false
+        : {
+          type: 'reload',
+          id: 'casePicker_caseVersion',
+        },
+      {
+        type: 'close',
+        id: 'deleteCaseDialog',
+      }
+    )
+
+    return {
+      data: {},
+    }
+  }
+
+  if (!appSetting.initial) {
+    return null
+  }
 
   return (
     <>
       {renderAmis(
         {
           type: 'form',
+          className: styles.selectCase,
           wrapWithPanel: false,
           mode: 'inline',
           id: 'casePickerForm',
@@ -318,36 +322,12 @@ export const SelectCase = () => {
               type: 'tree-select',
               name: 'caseId',
               id: 'casePicker_caseId',
-              clearable: true,
+              className: 'casePicker_caseId mr-0',
               label: false,
               searchable: true,
               placeholder: '请选择示例',
-              className: 'mr-0',
               enableDefaultIcon: false,
-              source: {
-                url: '/?caseId=${caseId}',
-                dataProvider: async () => {
-                  return {
-                    data: await getCasesTree({
-                      disableOnFiles: true,
-                    }),
-                  }
-                },
-              },
-              onEvent: {
-                change: {
-                  expression: '${event.data.__changeReason.type === "input"}',
-                  actions: [
-                    {
-                      actionType: 'reload',
-                      componentId: 'casePicker_caseVersion',
-                      data: {
-                        caseVersion: '',
-                      },
-                    },
-                  ],
-                },
-              },
+              source: caseIdApiConfig,
             },
             {
               type: 'tpl',
@@ -359,33 +339,12 @@ export const SelectCase = () => {
               label: false,
               name: 'caseVersion',
               id: 'casePicker_caseVersion',
+              className: 'casePicker_caseVersion',
               placeholder: '版本',
               autoFill: {
                 versionCount: '${count}',
               },
-              source: {
-                url: '/?caseId=${caseId}&caseVersion=${caseVersion}',
-                dataProvider: async (req) => {
-                  const { caseId, caseVersion } = req.query
-                  const versions = await getCaseVersions(caseId)
-                  const options = versions.map((item) => ({
-                    label: `V${item.value}: ${item.label}`,
-                    value: item.value,
-                    count: versions.length,
-                  }))
-                  const newData = {
-                    options,
-                  }
-                  if (!caseVersion) {
-                    newData.value = get(options, '0.value')
-                  }
-                  return {
-                    data: {
-                      data: newData,
-                    },
-                  }
-                },
-              },
+              source: caseVersionApiConfig,
             },
             {
               type: 'button-group',
@@ -397,37 +356,30 @@ export const SelectCase = () => {
                   tooltip: '基于当前代码新建或覆盖示例',
                   actionType: 'dialog',
                   disabledOn: '${!caseId || !caseVersion}',
-                  dialog: getNewVersionDialog({
-                    filesHash,
-                    setCurrVerPristine: async (nextCaseId, nextVersion, pristineHash) => {
-                      const { caseId, caseVersion } = appSetting
-                      if (caseId === nextCaseId && caseVersion === nextVersion) {
-                        storeRef.current.pristineFilesHash = pristineHash
-                      } else {
-                        const { pristineFilesHash } = await getCaseFiles(caseId, caseVersion, true)
-                        await setCaseFiles(caseId, caseVersion, pristineFilesHash)
-                      }
-                      setAmisValue('casePickerForm', {
-                        resetDisableByNew: true,
-                      })
-                    },
-                  }),
+                  disabledTip: '请选择示例',
                   level: 'primary',
+                  dialog: getNewVersionDialog({
+                    storeRef,
+                    filesHash,
+                    setCurrVerPristine,
+                  }),
                 },
                 {
                   type: 'button',
                   label: '重置',
+                  // TODO: 修复重置 按钮会闪动1下
                   disabledOn: '${!caseId || !caseVersion || resetDisable || resetDisableByNew}',
                   tooltip: '清除当前版本改动',
+                  disabledTip: '当前版本代码无变更',
                   onEvent: {
                     click: {
                       actions: [
                         {
                           actionType: 'custom',
-                          script: async (context, doAction, event) => {
-                            const { caseId, caseVersion } = event.data
-                            const { pristineFiles } = await getCaseFiles(caseId, caseVersion, true)
-                            setFiles(pristineFiles)
+                          script: (_context, _doAction, event) => {
+                            handleReset({
+                              data: event.data,
+                            })
                           },
                         },
                       ],
@@ -439,42 +391,38 @@ export const SelectCase = () => {
                   label: '删除',
                   tooltip: '删除该版本示例',
                   disabledOn: '${&|app_disabledCaseRemove}',
-                  confirmText:
-                    '删除该版本，会同时删除该版本对应的代码。如果只有一个版本，会同时删除示例。请谨慎操作！',
-                  actionType: 'ajax',
-                  api: {
-                    url: '/',
-                    dataProvider: async (req) => {
-                      const { caseId, caseVersion, versionCount } = req.data
-                      const onlyVersion = versionCount <= 1
-                      const newData = {}
-
-                      if (onlyVersion) {
-                        if (isUserCreatedCase(caseId)) {
-                          await updateCaseTree('delete', { value: caseId })
-                        } else {
-                          await delCaseVersion(caseId, caseVersion)
-                        }
-                        const caseTree = await getCasesTree()
-                        const treeNode = findTree(caseTree, (item) => !item.disabled)
-                        if (treeNode) {
-                          newData.caseId = treeNode.value
-                        }
-                      } else {
-                        await delCaseVersion(caseId, caseVersion)
-                        const versions = await getCaseVersions(caseId)
-                        const newCaseVersion = get(versions, `0.value`)
-                        if (newCaseVersion) {
-                          newData.caseVersion = newCaseVersion
-                        }
-                      }
-
-                      return {
-                        data: {
-                          data: newData,
+                  disabledTip: '内置默认版本无法删除',
+                  actionType: 'dialog',
+                  dialog: {
+                    id: 'deleteCaseDialog',
+                    title: '提示',
+                    body: `删除该版本，会同时删除该版本对应的代码。如果该示例只有一个版本，会同时删除该示例。`,
+                    actions: [
+                      {
+                        type: 'action',
+                        actionType: 'close',
+                        label: '取消',
+                      },
+                      {
+                        type: 'action',
+                        level: 'primary',
+                        label: '确认',
+                        onEvent: {
+                          click: {
+                            actions: [
+                              {
+                                actionType: 'custom',
+                                script: (_contenxt, _doAction, event) => {
+                                  handleDelete({
+                                    data: event.data,
+                                  })
+                                },
+                              },
+                            ],
+                          },
                         },
-                      }
-                    },
+                      },
+                    ],
                   },
                 },
               ],
@@ -485,36 +433,10 @@ export const SelectCase = () => {
               actions: [
                 {
                   actionType: 'custom',
-                  script: async (contenxt, doAction, event) => {
-                    const { initial, activeFileTab } = storeRef.current.appSetting
-                    setAmisValue('casePickerForm', {
-                      resetDisableByNew: false,
+                  script: (_formRef, _doAction, event) => {
+                    handleCaseChange({
+                      data: event.data,
                     })
-                    if (!initial) {
-                      return
-                    }
-
-                    const { caseId, caseVersion } = event.data
-                    if (!caseId || !caseVersion) {
-                      return
-                    }
-                    const { files = {} } = await getCaseFiles(caseId, caseVersion)
-                    const { pristineFilesHash = '' } = await setCaseFiles(
-                      caseId,
-                      caseVersion,
-                      files,
-                      true
-                    )
-
-                    const fileName = files[activeFileTab]
-                    await setAppSetting({
-                      caseId,
-                      caseVersion,
-                      activeFileTab: fileName ? activeFileTab : Object.keys(files)[0],
-                    })
-
-                    storeRef.current.pristineFilesHash = pristineFilesHash
-                    setFiles(files)
                   },
                 },
               ],
@@ -522,10 +444,7 @@ export const SelectCase = () => {
           },
         },
         {
-          data: {
-            caseEnable,
-            resetDisable: !filesHash || storeRef.current.pristineFilesHash === filesHash,
-          },
+          data: amisData,
           scopeRef: (ref: any) => {
             storeRef.current.scopeRef = ref
           },

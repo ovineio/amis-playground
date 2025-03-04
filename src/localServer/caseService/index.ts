@@ -2,28 +2,26 @@
  * 示例 server
  */
 
-import {
-  uuidv4,
-  flattenTree,
-  findTree,
-  spliceTree,
-  findIndex,
-  findTreeIndex,
-  mapTree,
-} from 'amis-core'
+import { uuidv4, findTree, spliceTree, findTreeIndex, mapTree, flattenTree } from 'amis-core'
 import { set, get, update, setMany, getMany, keys, del, delMany } from 'idb-keyval'
 import { get as getObj } from 'lodash'
 
 import { caseFilesMap } from './caseFiles'
-import { defaultCaseTree } from './defaultCase'
+import { CaseTreeSchema, defaultCaseTree, defCaseId } from './defaultCase'
 
-import { atou, hash2json, json2hash, utoa } from '@/Playground/utils'
+type VersionSchema = {
+  label: string
+  value: number
+  id?: string
+}
+
+type FilesSchema = string
 
 const dbKey = {
   caseTree: 'code_case_tree',
   getCaseVersions: (caseId: string) => `case_${caseId}_versions`,
   getCaseFiles: (caseId: string, version: string | number) => `case_${caseId}_${version}_files`,
-  getCasePristineFiles: (caseId: string, version: string) =>
+  getCasePristineFiles: (caseId: string, version: string | number) =>
     `case_${caseId}_${version}_pristineFiles`,
 }
 
@@ -31,11 +29,29 @@ const dbKey = {
  * caseTree
  */
 
-export const isUserCreatedCase = (caseId: string) => caseId?.indexOf('-') > -1
+export const caseType = {
+  formShare: (id: string) => id === defCaseId.myShare,
+  formMyCase: (id: string, root: boolean = true) =>
+    id === (root ? defCaseId.myCase : defCaseId.myCustomBase),
+  formCustom: (id: string) => id?.startsWith('my'),
+  formUserCreated: (caseId: string, opts?: { withMyShare?: boolean }) => {
+    const isCreated = caseId?.indexOf('-') > -1
+    const isMyShare = opts?.withMyShare ? caseType.formShare(caseId) : false
+
+    return isCreated || isMyShare
+  },
+  officialPristine: (caseId: string, version: string | number) => {
+    const userCreated = !caseType.formUserCreated(caseId, { withMyShare: true })
+    const defVersion = `${version}` === '1'
+
+    return userCreated && defVersion
+  },
+}
 
 export const initCaseTree = async () => {
   const savedTree = await get(dbKey.caseTree)
 
+  // TODO: 此处需要优化一下，如何更新
   let newTree
   if (!savedTree) {
     newTree = defaultCaseTree
@@ -48,7 +64,10 @@ export const initCaseTree = async () => {
   }
 }
 
-export const getCasesTree = async (options = {}) => {
+type CasesTreeOptions = {
+  disableOnFiles?: boolean
+}
+export const getCasesTree = async (options: CasesTreeOptions = {}): Promise<CaseTreeSchema[]> => {
   const { disableOnFiles = false } = options
   let caseTree = await get(dbKey.caseTree)
   if (!caseTree) {
@@ -64,7 +83,7 @@ export const getCasesTree = async (options = {}) => {
     }, {})
 
     caseTree = mapTree(caseTree, (item) => {
-      const isCheckKeys = isUserCreatedCase(item.value) || item.value === 'myShare'
+      const isCheckKeys = caseType.formUserCreated(item.value, { withMyShare: true })
       if (isCheckKeys) {
         item.disabled = !allKeyMap[dbKey.getCaseVersions(item.value)]
       }
@@ -75,6 +94,8 @@ export const getCasesTree = async (options = {}) => {
 }
 
 export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?: any) => {
+  let delCaseIdPool: string[] = []
+
   await update(dbKey.caseTree, (savedTree) => {
     let newTree = savedTree
     if (type === 'addChild') {
@@ -90,7 +111,14 @@ export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?
         parentCase.children = newChildren
       }
     } else if (type === 'delete') {
-      const idx = findTreeIndex(savedTree, (item) => item.value === data.value)
+      const idx = findTreeIndex(savedTree, (item) => {
+        const isMatch = item.value === data.value
+        if (isMatch) {
+          delCaseIdPool = flattenTree([item]).map((item) => item.value)
+        }
+        return isMatch
+      })
+
       newTree = spliceTree(savedTree, idx, 1)
     } else if (type === 'edit') {
       const idx = findTreeIndex(savedTree, (item) => item.value === data.value)
@@ -100,8 +128,8 @@ export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?
     return newTree
   })
 
-  if (type === 'delete') {
-    await delCaseVersions(data.value)
+  if (delCaseIdPool.length) {
+    await Promise.all(delCaseIdPool.map((id) => delCaseVersions(id)))
   }
 }
 
@@ -114,42 +142,61 @@ export const setCaseTree = async (tree: any) => {
  * caseFiles
  */
 // 获取文件
-export const getCaseFiles = async (caseId: string, version: string, pristine: boolean = false) => {
+export const getCaseFiles = async (
+  caseId: string,
+  version: string | number,
+  pristine: boolean = false
+) => {
   const keys = pristine
     ? [dbKey.getCaseFiles(caseId, version), dbKey.getCasePristineFiles(caseId, version)]
     : [dbKey.getCaseFiles(caseId, version)]
 
   const [filesHash, pristineFilesHash] = await getMany(keys)
   const result = {
-    files: filesHash ? hash2json(filesHash) : caseFilesMap[caseId],
-    filesHash: filesHash || json2hash(caseFilesMap[caseId]),
-    pristineFiles: {},
-    pristineFilesHash: '',
-  }
-  if (pristine) {
-    result.pristineFiles = pristineFilesHash ? hash2json(pristineFilesHash) : caseFilesMap[caseId]
-    result.pristineFilesHash = pristineFilesHash || json2hash(caseFilesMap[caseId])
+    filesHash: filesHash || '',
+    pristineFilesHash: pristineFilesHash || '',
+    officialPristine: caseType.officialPristine(caseId, version) ? caseFilesMap[caseId] : {},
   }
 
   return result
 }
 
+export const isCaseHasFiles = async (caseId: string, version: string) => {
+  const result = await get(dbKey.getCaseFiles(caseId, version))
+  return !!result
+}
+
 // 设置文件
-export const setCaseFiles = async (options: {
+type SetCaseFilesOptions = {
   caseId: string
   caseVersion: number
-  filesHash: string
+  versionLabel?: string
+  filesHash: FilesSchema
   pristine?: boolean
+  onlyPristine?: boolean
   overwritePristine?: boolean
-}) => {
-  const { caseId, caseVersion, filesHash, pristine = false, overwritePristine = false } = options
-  if (!caseId || !caseVersion) {
+}
+export const setCaseFiles = async (options: SetCaseFilesOptions) => {
+  const {
+    caseId,
+    caseVersion,
+    filesHash,
+    versionLabel,
+    pristine = false,
+    onlyPristine = false,
+    overwritePristine = false,
+  } = options
+
+  if (!caseId || !caseVersion || !filesHash) {
     return
   }
 
-  const setKeys = [[dbKey.getCaseFiles(caseId, caseVersion), filesHash]]
+  const setKeys =
+    pristine && onlyPristine ? [] : [[dbKey.getCaseFiles(caseId, caseVersion), filesHash]]
+
   let pristineFilesHash = ''
-  if (pristine) {
+  // 官方 pristine 不需要保存
+  if (pristine && !caseType.officialPristine(caseId, caseVersion)) {
     const pristineKey = dbKey.getCasePristineFiles(caseId, caseVersion)
     pristineFilesHash = await get(pristineKey)
     // 不存在 pristine 或者，强制覆盖 pristine。才更新 pristine
@@ -160,6 +207,10 @@ export const setCaseFiles = async (options: {
   }
 
   await setMany(setKeys)
+
+  if (versionLabel) {
+    await updateVersionLabel(caseId, caseVersion, versionLabel)
+  }
 
   return {
     pristineFilesHash,
@@ -179,30 +230,66 @@ export const delCaseFiles = async (caseId: string, version: string) => {
  * caseVersion
  */
 // 获取版本
-export const getCaseVersions = async (caseId: string) => {
+export const getCaseVersions = async (caseId: string): Promise<VersionSchema[]> => {
   if (!caseId) {
     return []
   }
 
   let versions = await get(dbKey.getCaseVersions(caseId))
-  if (!versions) {
+  if (!versions || !Array.isArray(versions)) {
     versions = [
       {
         value: 1,
         label: '默认',
       },
     ]
-    await set(dbKey.getCaseVersions(caseId), versions)
   }
   return versions
 }
 
-// 设置版本
-export const setCaseVersions = async (caseId: string, versions: any[]) => {
+// 删除 case 对应版本所有内容
+export const delCaseVersions = async (caseId: string) => {
+  if (!caseId) {
+    return
+  }
+  const versions = await getCaseVersions(caseId)
+  if (!Array.isArray(versions)) {
+    return
+  }
+  // 删除所有文件
+  const fileKeys = versions.flatMap((item) => [
+    dbKey.getCaseFiles(caseId, item.value),
+    dbKey.getCasePristineFiles(caseId, item.value),
+  ])
+  // 删除版本
+  const allKeys = [...fileKeys, dbKey.getCaseVersions(caseId)]
+
+  await delMany(allKeys)
+}
+
+// 设置全量版本
+export const setCaseVersions = async (caseId: string, versions: VersionSchema[]) => {
   if (!caseId || !Array.isArray(versions)) {
     return
   }
   await set(dbKey.getCaseVersions(caseId), versions)
+}
+
+// 设置某个版本的label
+export const updateVersionLabel = async (caseId: string, version: number, label: string) => {
+  if (!caseId || !version || !label) {
+    return
+  }
+
+  await update(dbKey.getCaseVersions(caseId), (versions = []) => {
+    const versionItem = versions.find((item) => item.value === version)
+
+    if (versionItem) {
+      versionItem.label = label
+    }
+
+    return versions
+  })
 }
 
 // 删除某个版本
@@ -226,9 +313,9 @@ export const delCaseVersion = async (caseId: string, version: string) => {
 }
 
 // 添加新版本
-export const addNewVersion = async (caseId: string, label: string) => {
+export const addNewVersion = async (caseId: string, label: string, id: string = '') => {
   if (!caseId) {
-    return
+    return -1
   }
 
   let newVersion = 1
@@ -241,6 +328,7 @@ export const addNewVersion = async (caseId: string, label: string) => {
       {
         value: newVersion,
         label,
+        id, // 目前仅仅是share的时候，标记了版本ID
       },
     ])
 
@@ -250,22 +338,36 @@ export const addNewVersion = async (caseId: string, label: string) => {
   return newVersion
 }
 
-// 删除 case 对应版本所有内容
-export const delCaseVersions = async (caseId: string) => {
-  if (!caseId) {
-    return
+// 某个versionId 下的版本文件变化情况
+export const checkFilesChangeByVerId = async (
+  files: FilesSchema,
+  caseId: string,
+  versionId: string
+): Promise<{
+  paramsError?: boolean
+  versionNotFound?: boolean
+  filesChanged?: boolean
+  version?: number
+}> => {
+  if (!files || !caseId || !versionId) {
+    return {
+      paramsError: true,
+    }
   }
-  const versions = await getCaseVersions(caseId)
-  if (!Array.isArray(versions)) {
-    return
-  }
-  // 删除所有文件
-  const fileKeys = versions.flatMap((item) => [
-    dbKey.getCaseFiles(caseId, item.value),
-    dbKey.getCasePristineFiles(caseId, item.value),
-  ])
-  // 删除版本
-  const allKeys = [...fileKeys, dbKey.getCaseVersions(caseId)]
 
-  await delMany(allKeys)
+  const versions = await getCaseVersions(caseId)
+  const versionItem = versions.find((item) => item.id === versionId)
+  if (!versionItem) {
+    return {
+      versionNotFound: true,
+    }
+  }
+
+  const versionFiles = await getCaseFiles(caseId, versionItem.value)
+  const filesChanged = files !== versionFiles.filesHash
+
+  return {
+    filesChanged,
+    version: versionItem.value,
+  }
 }

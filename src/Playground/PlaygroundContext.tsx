@@ -2,7 +2,7 @@ import React, { createContext, useEffect, useState } from 'react'
 
 import { setCaseFiles } from './components/Header/utils'
 import { MAIN_FILE_NAME } from './templateAmis/files'
-import { fileName2Language, setPlaygroundTheme, utoa } from './utils'
+import { fileName2Language, json2hash, setPlaygroundTheme, utoa } from './utils'
 
 import type { ContextAppSetting, IFiles, IPlaygroundContext } from './types'
 import * as settingService from '@/localServer/settingService'
@@ -26,6 +26,7 @@ export const PlaygroundProvider = (props: {
   const [appSetting, _setAppSetting] = useState<Partial<ContextAppSetting>>({
     initial: false,
     theme: 'light',
+    shareTitle: '',
     activeFileTab: MAIN_FILE_NAME,
   })
 
@@ -65,16 +66,20 @@ export const PlaygroundProvider = (props: {
   }
 
   useEffect(() => {
-    const hash = utoa(JSON.stringify(files))
-    setFilesHash(hash)
+    const filesHash = json2hash(files)
+    setFilesHash(filesHash)
     const { caseId, caseVersion } = appSetting
     if (caseId && caseVersion) {
-      setCaseFiles(caseId, caseVersion, hash)
+      setCaseFiles({
+        caseId,
+        caseVersion,
+        filesHash,
+      })
     }
   }, [files])
 
   const setAppSetting = async (setting = {}) => {
-    const { initial, ...rest } = setting
+    const { initial, shareTitle, ...rest } = setting
     _setAppSetting((pre) => ({
       ...pre,
       ...setting,

@@ -1,3 +1,4 @@
+import { confirm } from 'amis-ui'
 import classnames from 'classnames'
 import React, { useState, useRef, useEffect } from 'react'
 
@@ -59,6 +60,16 @@ export const FileItem: React.FC<ITabsItem> = (props) => {
     }, 0)
   }
 
+  const handleRemove = async () => {
+    const isConfirm = await confirm(
+      `确认删除 <span class="text-primary font-bold">${name} </span>  吗？`,
+      '提示'
+    )
+    if (isConfirm) {
+      onRemove(name)
+    }
+  }
+
   useEffect(() => {
     inputRef?.current?.focus()
   }, [])
@@ -84,14 +95,12 @@ export const FileItem: React.FC<ITabsItem> = (props) => {
         <>
           <span onDoubleClick={handleDoubleClick}>{name}</span>
           {readOnlyTabs.includes(name) ? null : (
-            <Dialog message={`确定要删除 ${name} 吗?`} onConfirm={() => onRemove(name)}>
-              <span style={{ marginLeft: 5, display: 'flex' }}>
-                <svg width='12' height='12' viewBox='0 0 24 24'>
-                  <line stroke='#999' x1='18' y1='6' x2='6' y2='18'></line>
-                  <line stroke='#999' x1='6' y1='6' x2='18' y2='18'></line>
-                </svg>
-              </span>
-            </Dialog>
+            <span style={{ marginLeft: 5, display: 'flex' }} onClick={handleRemove}>
+              <svg width='12' height='12' viewBox='0 0 24 24'>
+                <line stroke='#999' x1='18' y1='6' x2='6' y2='18'></line>
+                <line stroke='#999' x1='6' y1='6' x2='18' y2='18'></line>
+              </svg>
+            </span>
           )}
         </>
       )}

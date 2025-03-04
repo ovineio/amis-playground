@@ -1,0 +1,44 @@
+.selectCase {
+
+  :global {
+    .cxd-Spinner {
+      display: none;
+    }
+    .cxd-Form-item {
+      margin-bottom: 0;
+    }
+    .cxd-TreeSelectControl > .cxd-TreeSelect-popover {
+      width: auto;
+    }
+    .cxd-Tree-itemArrow {
+      margin-right: 0;
+    }
+    .cxd-Tree-itemLabel-item {
+      padding-left: 0;
+    }
+  }
+}
+
+.newVersionDialog {
+  :global {
+
+    // 优化 只能选择子节点
+    .cxd-Tree-itemText {
+      color: inherit;
+      &:hover {
+        color: inherit;
+      }
+    }
+    .cxd-Tree-itemLabel {
+      color: var(--inputTree-base-disabled-color);
+      &:hover {
+        color: var(--inputTree-base-disabled-color);
+      }
+    }
+    .cxd-Tree-item--isLeaf {
+      .cxd-Tree-itemLabel:not(.is-disabled) {
+        color: var(--inputTree-base-default-color);
+      }
+    }
+  }
+}

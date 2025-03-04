@@ -139,6 +139,7 @@ export const getCaseFiles = async (options: CaseFilesOptions): Promise<CaseFiles
   return caseFilesInfo
 }
 
+const defaultHash = json2hash({})
 export const setCaseFiles = async (
   options: CaseFilesOptions & {
     versionLabel?: string
@@ -165,15 +166,18 @@ export const setCaseFiles = async (
     return {}
   }
 
-  await caseService.setCaseFiles({
-    caseId,
-    caseVersion,
-    versionLabel,
-    filesHash,
-    pristine,
-    onlyPristine,
-    overwritePristine,
-  })
+  if (filesHash && filesHash !== defaultHash) {
+    await caseService.setCaseFiles({
+      caseId,
+      caseVersion,
+      versionLabel,
+      filesHash,
+      pristine,
+      onlyPristine,
+      overwritePristine,
+    })
+  }
+
   let caseInfo = {}
   if (returnCaseInfo) {
     caseInfo = await getCaseFiles({

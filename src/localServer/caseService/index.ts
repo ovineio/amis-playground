@@ -2,7 +2,7 @@
  * 示例 server
  */
 
-import { uuidv4, findTree, spliceTree, findTreeIndex, mapTree } from 'amis-core'
+import { uuidv4, findTree, spliceTree, findTreeIndex, mapTree, flattenTree } from 'amis-core'
 import { set, get, update, setMany, getMany, keys, del, delMany } from 'idb-keyval'
 import { get as getObj } from 'lodash'
 
@@ -63,7 +63,10 @@ export const initCaseTree = async () => {
   }
 }
 
-export const getCasesTree = async (options = {}): Promise<CaseTreeSchema[]> => {
+type CasesTreeOptions = {
+  disableOnFiles?: boolean
+}
+export const getCasesTree = async (options: CasesTreeOptions = {}): Promise<CaseTreeSchema[]> => {
   const { disableOnFiles = false } = options
   let caseTree = await get(dbKey.caseTree)
   if (!caseTree) {
@@ -90,6 +93,8 @@ export const getCasesTree = async (options = {}): Promise<CaseTreeSchema[]> => {
 }
 
 export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?: any) => {
+  let delCaseIdPool: string[] = []
+
   await update(dbKey.caseTree, (savedTree) => {
     let newTree = savedTree
     if (type === 'addChild') {
@@ -105,7 +110,14 @@ export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?
         parentCase.children = newChildren
       }
     } else if (type === 'delete') {
-      const idx = findTreeIndex(savedTree, (item) => item.value === data.value)
+      const idx = findTreeIndex(savedTree, (item) => {
+        const isMatch = item.value === data.value
+        if (isMatch) {
+          delCaseIdPool = flattenTree([item]).map((item) => item.value)
+        }
+        return isMatch
+      })
+
       newTree = spliceTree(savedTree, idx, 1)
     } else if (type === 'edit') {
       const idx = findTreeIndex(savedTree, (item) => item.value === data.value)
@@ -115,8 +127,8 @@ export const updateCaseTree = async (type: 'addChild' | 'delete' | 'edit', data?
     return newTree
   })
 
-  if (type === 'delete') {
-    await delCaseVersions(data.value)
+  if (delCaseIdPool.length) {
+    await Promise.all(delCaseIdPool.map((id) => delCaseVersions(id)))
   }
 }
 
@@ -174,7 +186,7 @@ export const setCaseFiles = async (options: SetCaseFilesOptions) => {
     overwritePristine = false,
   } = options
 
-  if (!caseId || !caseVersion) {
+  if (!caseId || !caseVersion || !filesHash) {
     return
   }
 
@@ -269,10 +281,10 @@ export const updateVersionLabel = async (caseId: string, version: number, label:
   }
 
   await update(dbKey.getCaseVersions(caseId), (versions = []) => {
-    const versionItem = versions.find((item)=> item.value === version)
+    const versionItem = versions.find((item) => item.value === version)
 
     if (versionItem) {
-      versions.label = label
+      versionItem.label = label
     }
 
     return versions
@@ -315,7 +327,7 @@ export const addNewVersion = async (caseId: string, label: string, id: string = 
       {
         value: newVersion,
         label,
-        id,
+        id, // 目前仅仅是share的时候，标记了版本ID
       },
     ])
 

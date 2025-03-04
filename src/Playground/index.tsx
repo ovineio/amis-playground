@@ -1,4 +1,4 @@
-import { confirm } from 'amis-ui'
+import { alert, confirm } from 'amis-ui'
 import moment from 'moment'
 import React, { useContext, useEffect } from 'react'
 
@@ -14,7 +14,7 @@ import { getCustomActiveFile, getMergedCustomFiles, getPlaygroundTheme } from '.
 import type { IPlayground } from './types'
 
 import './index.less'
-import { addNewVersion, initCaseTree, checkFilesChangeByVerId } from '@/localServer/caseService'
+import { addNewVersion, initCaseTree, checkFilesChangeByVerId, updateVersionLabel } from '@/localServer/caseService'
 import { defCaseId } from '@/localServer/caseService/defaultCase'
 import { getAppSetting } from '@/localServer/settingService'
 import { getShareFormUrl } from '@/localServer/shareService'
@@ -77,10 +77,16 @@ const ReactPlayground = (props: IPlayground) => {
     let caseId = appSetting.caseId || 'baseSimple'
     let caseVersion = appSetting.caseVersion || 1
 
-    const { shareId, share, title } = await getShareFormUrl()
-    if (shareId && share) {
+    const shareData = await getShareFormUrl()
+
+    if (shareData?.isShortUrlExpired) {
+      alert('当前打开的分享链接已过期', '提示')
+    } else if (shareData) {
+      const { share, title, shareId } = shareData
       caseId = defCaseId.myShare
       const checkInfo = await checkFilesChangeByVerId(share, caseId, shareId)
+
+      caseVersion = checkInfo.version!
 
       const getVerDefLabel = () => title || `${moment().format('YYMMDD-hh:mm:ss')}`
 
@@ -100,10 +106,10 @@ const ReactPlayground = (props: IPlayground) => {
         const isConfirm = await confirm(
           `
           您已浏览过当前分享的代码，并进行了修改。<br/>
-          <div class="font-bold">是否丢弃已修改的代码，重置为当前分享代码？</div><br/>
+          <div class="font-bold pt-1">是否丢弃已修改的代码，重置为当前分享的代码？</div><br/>
           <div class="text-muted">
             tips: 如果您不想丢弃修改的代码，可按如下步骤操作：
-            <br/> 1.进行“取消”操作，将改动代码，进行“新建”版本保存。
+            <br/> 1.进行“取消”操作，将已改动的代码，进行“新建”版本保存。
             <br/> 2.再次打开该分享链接。
           </div>`,
           '提示',
@@ -113,7 +119,6 @@ const ReactPlayground = (props: IPlayground) => {
           }
         )
         if (isConfirm) {
-          caseVersion = checkInfo.version!
           await setCaseFiles({
             caseId,
             caseVersion,
@@ -123,6 +128,9 @@ const ReactPlayground = (props: IPlayground) => {
             overwritePristine: true,
           })
         }
+      } else {
+        // 代码相同时，调整版本label
+        await updateVersionLabel(caseId, caseVersion, getVerDefLabel())
       }
     }
 
@@ -134,7 +142,7 @@ const ReactPlayground = (props: IPlayground) => {
       }
     }
 
-    setAppSetting({
+    await setAppSetting({
       initial: true,
       ...appSetting,
     })

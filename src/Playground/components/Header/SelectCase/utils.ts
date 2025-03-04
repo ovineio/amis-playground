@@ -329,6 +329,7 @@ export const getNewVersionDialog = (options = {}) => {
                 name: 'label',
                 showCounter: true,
                 maxLength: 12,
+                placeholder: '请输入',
               },
             ],
             addApi: {
@@ -360,6 +361,7 @@ export const getNewVersionDialog = (options = {}) => {
                 name: 'label',
                 showCounter: true,
                 maxLength: 12,
+                placeholder: '请输入',
               },
             ],
             editApi: {

@@ -2,31 +2,38 @@
 
 import { anyChanged, uuidv4 } from 'amis-core'
 import axios from 'axios'
+import { get, set } from 'idb-keyval'
 import { isString } from 'lodash'
 
+import { caseType, getCaseFiles, getCaseVersions } from './caseService'
+
 import { getUrlPath } from '@/Playground/utils'
+
+const dbKey = {
+  appShareCache: 'app_share_cache',
+}
 
 const dpasteGetUrl = 'https://dpaste.com/'
 const dpastePostUrl = 'https://dpaste.com/api/v2/'
 
-type DpasteData = {
+type ShareData = {
   title: string
   shareId: string
   share: string
 }
 const dpasteService = {
-  getProject: async (dpasteId: string): Promise<DpasteData> => {
+  getProject: async (dpasteId: string): Promise<ShareData> => {
     const result = await axios.get(dpasteGetUrl + dpasteId + '.txt')
-    console.log('-->getProject', result)
-    const { title, content } = result.data
-    const contentData = JSON.parse(decodeURIComponent(content))
-    return {
-      title,
-      ...contentData,
-    }
+    const shareData = JSON.parse(decodeURIComponent(result.data))
+    return shareData
   },
-  shareProject: async (config: DpasteData & { expiryDays?: number }): Promise<string> => {
-    const { title, expiryDays = 90, ...content } = config
+  shareProject: async (config: ShareData & { expiryDays?: number }): Promise<string> => {
+    const { title, expiryDays = 90, share, shareId } = config
+    const shareData = {
+      share,
+      shareId,
+      title,
+    }
     const result = await axios(dpastePostUrl, {
       method: 'post',
       headers: {
@@ -34,8 +41,8 @@ const dpasteService = {
         'User-Agent': 'LiveCodes / https://livecodes.io/',
       },
       data: {
-        content: encodeURIComponent(JSON.stringify(content)),
-        title: encodeURIComponent(title || ''),
+        content: encodeURIComponent(JSON.stringify(shareData)),
+        title: shareId,
         syntax: 'json',
         expiry_days: import.meta.env.MODE === 'production' ? expiryDays : 1,
       },
@@ -43,23 +50,43 @@ const dpasteService = {
 
     const resData = result.data || ''
 
-    const dpasteId = isString(resData) ? resData.replace(dpasteGetUrl, '').replaceALl('\n', '') : ''
+    const dpasteId = isString(resData) ? resData.replace(dpasteGetUrl, '').replaceAll('\n', '') : ''
     const dpasteUrl = getUrlPath(`dpasteId=${dpasteId}`)
 
     return dpasteUrl
   },
 }
 
-const shareCache = {
-  share: '',
-  title: '',
-  shareId: '',
-  shortUrl: '',
-  expiryDays: 90,
+type ShareCache = {
+  share: string
+  shareId: string
+  shortUrl: string
+  expiryDays: number
 }
+
+const setShareCache = async (cache: ShareCache) => {
+  await set(dbKey.appShareCache, cache)
+}
+
+const getShareCache = async () => {
+  const cache = await get(dbKey.appShareCache)
+  if (!cache) {
+    return {
+      share: '',
+      shareId: '',
+      shortUrl: '',
+      expiryDays: 90,
+    }
+  }
+
+  return cache
+}
+
 type ShareOptions = {
   share: string
   title: string
+  caseId?: string
+  caseVersion?: number | string
   useShortUrl?: boolean
   expiryDays?: number
 }
@@ -97,9 +124,13 @@ const getShareShortUrl = async (options: ShareOptions & { shareId: string }) => 
 
 export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> => {
   const { useShortUrl } = options
+
+  const shareCache = await getShareCache()
+
   /**
-   * 优化连续多次点击分享，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
+   * 优化1: 优化连续多次点击分享，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
    * 如果 “share” 分享的文件内容不变，则使用缓存的 shareId，进行优化
+   * start:
    */
   if (!anyChanged(['share'], shareCache, options)) {
     let shortUrl = ''
@@ -114,15 +145,38 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
       }
     }
 
-    const fullUrl = getShareFullUrl(shareCache)
+    const fullUrl = getShareFullUrl({
+      ...shareCache,
+      title: options.title,
+    })
+
     return {
       fullUrl,
       shortUrl,
       isShortUrlErr: useShortUrl && !shortUrl,
     }
   }
+  // end
 
-  const shareId = uuidv4()
+  let shareId = uuidv4()
+
+  /**
+   * 优化2: 如果将他人分享的代码任何不做修改，直接分享，则使用相同 shareId。（防止分享的相同代码不断占用空间）
+   * start:
+   */
+  const { caseId, caseVersion } = options
+  if (caseId && caseVersion && caseType.formShare(caseId)) {
+    const { filesHash, pristineFilesHash } = await getCaseFiles(caseId, caseVersion, true)
+    if (filesHash === pristineFilesHash) {
+      const versions = await getCaseVersions(caseId)
+      const version = versions.find((item) => `${item.value}` === `${caseVersion}`)
+      if (version?.id) {
+        shareId = version.id
+      }
+    }
+  }
+  // end
+
   const fullUrl = getShareFullUrl({
     ...options,
     shareId,
@@ -136,8 +190,7 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
     })
   }
 
-  Object.assign(shareCache, {
-    title: options.title,
+  await setShareCache({
     expiryDays: options.expiryDays || 90,
     share: options.share,
     shareId,
@@ -151,24 +204,45 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
   }
 }
 
+type ShareDataResult = ShareData & {
+  isShortUrlExpired?: true
+}
 export const getShareFormUrl = async () => {
   const urlQuery = new URLSearchParams(location.search)
-  const shareId = urlQuery.get('shareId') || ''
-  const title = decodeURIComponent(urlQuery.get('title') || '')
-  const share = decodeURIComponent(urlQuery.get('share') || '')
 
-  if (shareId || share) {
+  const dpasteId = urlQuery.get('dpasteId') || ''
+
+  let shareData: Partial<ShareData> = {}
+
+  if (dpasteId) {
+    try {
+      shareData = await dpasteService.getProject(dpasteId)
+    } catch {
+      //
+    }
+  } else {
+    shareData = {
+      shareId: urlQuery.get('shareId') || '',
+      title: decodeURIComponent(urlQuery.get('title') || ''),
+      share: decodeURIComponent(urlQuery.get('share') || ''),
+    }
+  }
+
+  if (shareData.shareId || shareData.share) {
     // 删除分享参数
-    urlQuery.delete('share')
-    urlQuery.delete('shareId')
-    urlQuery.delete('title')
+    Object.keys(shareData)
+      .concat(['dpasteId'])
+      .forEach((key) => {
+        urlQuery.delete(key)
+      })
+
     const newUrl = location.origin + location.pathname + '?' + urlQuery.toString()
     history.replaceState({}, '', newUrl)
   }
 
-  return {
-    title,
-    shareId,
-    share,
+  if (!shareData.shareId && !shareData.share) {
+    return
   }
+
+  return shareData as ShareDataResult
 }

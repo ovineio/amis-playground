@@ -32,6 +32,7 @@ module.exports = {
     //"space-before-function-paren": 0,  // 关闭函数名与括号之间的空格检查
     'multiline-ternary': 0,  // 允许多行的条件表达式
     "no-new": 0,  // 允许直接调用构造函数创建实例对象
+    "no-template-curly-in-string": 0,
     'import/order': [
       'error',
       {

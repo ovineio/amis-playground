@@ -1,4 +1,4 @@
-import { toast, prompt, confirm, alert } from 'amis-ui'
+import { toast, confirm } from 'amis-ui'
 import copy from 'copy-to-clipboard'
 import React, { useContext, useRef, useState } from 'react'
 
@@ -27,6 +27,8 @@ export const Header: React.FC = () => {
       title,
       useShortUrl,
       expiryDays,
+      caseId: appSetting.caseId,
+      caseVersion: appSetting.caseVersion,
       share: filesHash,
     })
 
@@ -34,7 +36,7 @@ export const Header: React.FC = () => {
       copy(url, {
         // debug: true,
         format: 'text/plain',
-        message: '', // 不提示
+        // message: '', // 不提示
         onCopy: () => {
           setCopyed(true)
           toast.success('已复制到剪切板～')
@@ -53,8 +55,13 @@ export const Header: React.FC = () => {
     })
 
     if (isShortUrlErr) {
-      await alert('生成短链发生错误，当前使用完整链接进行分享。', '提示')
-      copyShareUrl(fullUrl)
+      const isConfirm = await confirm('生成短链发生错误，是否使用完整链接进行分享。', '提示', {
+        confirmText: '分享',
+        confirmBtnLevel: 'primary',
+      })
+      if (isConfirm) {
+        copyShareUrl(fullUrl)
+      }
       return
     }
 
@@ -67,8 +74,8 @@ export const Header: React.FC = () => {
       actionType: 'dialog',
       data: {
         title: appSetting.shareTitle,
-        // useShortUrl: appSetting.shareConfig?.useShortUrl || false,
-        useShortUrl: false,
+        useShortUrl: appSetting.shareConfig?.useShortUrl || false,
+        // useShortUrl: false,
         expiryDays: appSetting.shareConfig?.expiryDays || 90,
       },
       dialog: {
@@ -80,22 +87,39 @@ export const Header: React.FC = () => {
           // debug: true,
           mode: 'horizontal',
           wrapWithPanel: false,
+          api: {
+            url: '/share',
+            method: 'post',
+            dataProvider: async (req) => {
+              await handleShare(req.data)
+              return {
+                data: {},
+              }
+            },
+          },
           body: [
             {
               type: 'input-text',
               label: '分享标题',
               name: 'title',
               clearable: true,
-              placeholder: '请输入标题',
+              placeholder: '请输入',
               required: true,
+              maxLength: 12,
+              showCounter: true,
+              desc: '请输入能够表示代码大致意图的简单文案',
+              labelRemark:
+                '该标题会作为”版本描述“展示。<br/>如果需要大量描述信息，请在代码编辑器中使用“注释”，进行备注～',
             },
-            // {
-            //   type: 'switch',
-            //   label: '使用短链接',
-            //   onText: '是',
-            //   offText: '否',
-            //   name: 'useShortUrl',
-            // },
+            {
+              type: 'switch',
+              label: '短链分享',
+              onText: '是',
+              offText: '否',
+              name: 'useShortUrl',
+              labelRemark:
+                '短链会让URL更加简洁，但是会有过期时间。<br/>可根据分享的意图，设置对应的过期时间。<br/> 如果仅用于个人自测试目的，可无需使用短链。',
+            },
             {
               type: 'select',
               name: 'expiryDays',
@@ -125,28 +149,6 @@ export const Header: React.FC = () => {
               ],
             },
           ],
-          onEvent: {
-            validateSucc: {
-              actions: [
-                {
-                  actionType: 'custom',
-                  script: async (context, doAction, event) => {
-                    try {
-                      await handleShare(event.data)
-                      doAction([
-                        {
-                          actionType: 'close',
-                          componentId: 'shareDialog',
-                        },
-                      ])
-                    } catch (err) {
-                      console.log('handleShare err', err)
-                    }
-                  },
-                },
-              ],
-            },
-          },
         },
         actions: [
           {
@@ -158,7 +160,7 @@ export const Header: React.FC = () => {
             type: 'action',
             label: '分享',
             level: 'primary',
-            actionType: 'validate',
+            actionType: 'submit',
           },
         ],
       },

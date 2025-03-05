@@ -4,6 +4,7 @@ import { useContext, useState } from 'react'
 
 import { icons } from '../utils'
 
+import { getShareUrl } from '@/localServer/shareService'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 
 type Props = {

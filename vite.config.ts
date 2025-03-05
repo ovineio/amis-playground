@@ -3,6 +3,7 @@ import { resolve } from 'path'
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor'
+import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -18,6 +19,16 @@ export default defineConfig({
         },
       },
     }),
+    svgr({
+      exportAsDefault: true,
+      svgrOptions: {
+        svgProps: {
+          className: 'icon',
+        },
+        prettier: false,
+        dimensions: false,
+      },
+    }),
     monacoEditorPlugin({}),
   ],
   css: {
@@ -30,6 +41,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      '@root': __dirname
     },
   },
 })

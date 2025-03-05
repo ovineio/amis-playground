@@ -2,6 +2,7 @@ import { Monaco } from '@monaco-editor/react'
 import { getWorker, MonacoJsxSyntaxHighlight } from 'monaco-jsx-syntax-highlight'
 
 import { createATA } from './ata'
+import { amisPkgDefineFiles, declareUsedPkgs } from './types'
 
 export const useEditor = () => {
   // 点击变量跳转
@@ -66,9 +67,17 @@ export const useEditor = () => {
     return typeHelper
   }
 
+  const loadTsExtraLib = (editor: any, monaco: any, defaultValue: string, onWatch: any) => {
+    const dtsFiles = amisPkgDefineFiles.concat(declareUsedPkgs)
+    dtsFiles.forEach((item) => {
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(item[0], item[1])
+    })
+  }
+
   return {
     autoLoadExtraLib,
     doOpenEditor,
+    loadTsExtraLib,
     loadJsxSyntaxHighlight,
   }
 }

@@ -1,7 +1,8 @@
 /**
+ * TODO: 最终方案是使用iframe隔离。目前暂时使用方案3
  * 1. 仍然使用 iframe , 用 esbuild 在 worker 编译 (由于worker中无法使用 window 等，直接放弃)
  * 2. 不需要 worker 编译，直接将编译好代码 ， post 到 iframe, 在 iframe 中执行.(放弃原因：1.postmessage只能传string 2.解析的scope无法传入iframe。 )
- * 2. 使用 直接使用 esbuild 编译+预览 （放弃 1,2 的iframe这套）
+ * 3. 使用 直接使用 esbuild 编译+预览 （放弃 1,2 的iframe这套）
  */
 
 import React, { useMemo } from 'react'
@@ -16,7 +17,7 @@ import styles from './index.module.less'
 
 import type { IOutput } from '@/Playground/types'
 
-const internalId = 'internalId'
+const internalId = 'PreviewInternalId'
 
 const customRequire = (key: any) => {
   const res = dependencies[key]

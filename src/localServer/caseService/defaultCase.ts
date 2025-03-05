@@ -40,7 +40,7 @@ export const defaultCaseTree: CaseTreeSchema[] = [
     disabled: true,
     children: [
       {
-        label: '案例1',
+        label: '综合示例',
         value: defCaseId.myCustomBase,
       },
     ],

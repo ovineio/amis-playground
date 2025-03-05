@@ -77,16 +77,16 @@ function compileGlobalCss(css: string, buildId: string) {
  * https://github1s.com/egoist/play-esbuild/blob/HEAD/src/components/App.vue#L67
  */
 
-let _init: Promise<void> | null = null
+let isInitial = false
 
 const initEsbuild = async () => {
   try {
-    if (!_init) {
-      _init = esbuild.initialize({
+    if (!isInitial) {
+      await esbuild.initialize({
         wasmURL: urlJoin(globalConfig.esbuildWasmPath, 'esbuild.wasm'),
       })
+      isInitial = true
     }
-    await _init
   } catch (err: any) {
     console.log('🚀 ~ initEsbuild ~ err:', err)
     if (!err.toString().includes('Cannot call "initialize" more than once')) {
@@ -121,7 +121,7 @@ const logger = new Logger()
 // https://esbuild.github.io/api/#resolve-extensions
 const RESOLVE_EXTENSIONS = ['.tsx', '.ts', '.jsx', '.js', '']
 
-const RESOLVE_NAMESPACE = 'playground-input'
+const RESOLVE_NAMESPACE = 'AmisPlayground'
 
 function resolvePlugin(files: InputFile[], buildId: string): esbuild.Plugin {
   return {

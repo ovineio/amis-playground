@@ -51,6 +51,7 @@ export const caseType = {
 export const initCaseTree = async () => {
   const savedTree = await get(dbKey.caseTree)
 
+  // TODO: 此处需要优化一下，如何更新
   let newTree
   if (!savedTree) {
     newTree = defaultCaseTree

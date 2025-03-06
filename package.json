@@ -87,6 +87,7 @@
   "devDependencies": {
     "@types/babel__standalone": "^7.1.5",
     "@types/file-saver": "^2.0.5",
+    "@types/lodash": "^4.14.175",
     "@types/node": "^20.8.10",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",

@@ -1,4 +1,3 @@
-
 import { strFromU8, strToU8, unzlibSync, zlibSync } from 'fflate'
 
 import { IMPORT_MAP_FILE_NAME, reactTemplateFiles, initFiles } from './templateAmis/files'
@@ -129,7 +128,8 @@ export const fileName2Language = (name: string) => {
   return 'javascript'
 }
 
-export const getUrlPath = (queryString: string) => {
-  const urlPath = location.origin + location.pathname + '?' + queryString.replace('?', '')
+export const getUrlPath = (queryStr: string = '') => {
+  const { origin, pathname } = location
+  const urlPath = `${origin}${pathname}${queryStr ? `?${queryStr.replace('?', '')}` : ''}`
   return urlPath
 }

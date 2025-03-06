@@ -6,6 +6,7 @@ specifiers:
   '@monaco-editor/react': ^4.5.2
   '@types/babel__standalone': ^7.1.5
   '@types/file-saver': ^2.0.5
+  '@types/lodash': ^4.14.175
   '@types/node': ^20.8.10
   '@types/react': ^18.2.15
   '@types/react-dom': ^18.2.7
@@ -100,6 +101,7 @@ dependencies:
 devDependencies:
   '@types/babel__standalone': 7.1.6
   '@types/file-saver': 2.0.6
+  '@types/lodash': 4.17.16
   '@types/node': 20.8.10
   '@types/react': 18.2.33
   '@types/react-dom': 18.2.14
@@ -1150,6 +1152,10 @@ packages:
 
   /@types/json5/0.0.29:
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
+    dev: true
+
+  /@types/lodash/4.17.16:
+    resolution: {integrity: sha512-HX7Em5NYQAXKW+1T+FiuG27NGwzJfCX3s1GjOa7ujxZa52kjJLOr4FUxT+giF6Tgxv1e+/czV/iTtBw27WTU9g==}
     dev: true
 
   /@types/minimist/1.2.4:

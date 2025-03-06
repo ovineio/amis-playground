@@ -1,9 +1,14 @@
 // app 分享
+/**
+ * TODO:
+ *  1. 支持官方案例，参数添加 caseId, 这样如果官方案例代码未做任何变动，可以直接定位到对应的，case。
+ *  1. 思考，如何处理对相同示例多次分享？
+ */
 
 import { anyChanged, uuidv4 } from 'amis-core'
 import axios from 'axios'
 import { get, set } from 'idb-keyval'
-import { isString } from 'lodash'
+import { isString, omit } from 'lodash'
 
 import { caseType, getCaseFiles, getCaseVersions } from './caseService'
 
@@ -57,45 +62,48 @@ const dpasteService = {
   },
 }
 
-type ShareCache = {
+type ShareOptions = {
   share: string
-  shareId: string
+  title: string
+  caseId?: string
+  caseVersion?: number | string
+  expiryDays?: number
+  useShortUrl?: boolean
+}
+
+type ShareCache = Omit<ShareOptions, 'useShortUrl'> & {
   shortUrl: string
-  expiryDays: number
+  shareId: string
 }
 
 const setShareCache = async (cache: ShareCache) => {
   await set(dbKey.appShareCache, cache)
 }
 
-const getShareCache = async () => {
+export const getShareCache = async () => {
   const cache = await get(dbKey.appShareCache)
   if (!cache) {
-    return {
+    const defCache: ShareCache = {
+      title: '',
       share: '',
       shareId: '',
+      caseId: '',
       shortUrl: '',
+      caseVersion: -1,
       expiryDays: 90,
     }
+    return defCache
   }
 
-  return cache
+  return cache as ShareCache
 }
 
-type ShareOptions = {
-  share: string
-  title: string
-  caseId?: string
-  caseVersion?: number | string
-  useShortUrl?: boolean
-  expiryDays?: number
-}
 type ShareResult = {
   fullUrl: string
   shortUrl: string
   isShortUrlErr?: boolean
 }
-const getShareFullUrl = (options: ShareOptions & { shareId: string }) => {
+const getShareFullUrl = (options: { share: string; title: string; shareId: string }) => {
   let { share, title, shareId } = options
   share = encodeURIComponent(share)
   title = encodeURIComponent(title)
@@ -111,11 +119,7 @@ const getShareFullUrl = (options: ShareOptions & { shareId: string }) => {
 const getShareShortUrl = async (options: ShareOptions & { shareId: string }) => {
   let shortUrl = ''
   try {
-    shortUrl = await dpasteService.shareProject({
-      ...options,
-      shareId: options.shareId,
-      expiryDays: options.expiryDays,
-    })
+    shortUrl = await dpasteService.shareProject(options)
   } catch (err) {
     console.log('dpasteService.shareProject err', err)
   }
@@ -128,8 +132,8 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
   const shareCache = await getShareCache()
 
   /**
-   * 优化1: 优化连续多次点击分享，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
-   * 如果 “share” 分享的文件内容不变，则使用缓存的 shareId，进行优化
+   * 优化1: 优化连续多次点击分享， fileHash相同，使用相同的 shareId（ID相同，被分享后会以相同位置存储）
+   * 也就是说： 如果分享的文件内容不变，则使用缓存的 shareId，进行优化
    * start:
    */
   if (!anyChanged(['share'], shareCache, options)) {
@@ -146,8 +150,9 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
     }
 
     const fullUrl = getShareFullUrl({
-      ...shareCache,
       title: options.title,
+      share: shareCache.share,
+      shareId: shareCache.shareId,
     })
 
     return {
@@ -178,7 +183,8 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
   // end
 
   const fullUrl = getShareFullUrl({
-    ...options,
+    share: options.share,
+    title: options.title,
     shareId,
   })
 
@@ -191,10 +197,9 @@ export const getShareUrl = async (options: ShareOptions): Promise<ShareResult> =
   }
 
   await setShareCache({
-    expiryDays: options.expiryDays || 90,
-    share: options.share,
-    shareId,
+    ...omit(options, ['useShortUrl']),
     shortUrl,
+    shareId,
   })
 
   return {
@@ -236,7 +241,8 @@ export const getShareFormUrl = async () => {
         urlQuery.delete(key)
       })
 
-    const newUrl = location.origin + location.pathname + '?' + urlQuery.toString()
+    const urlString = urlQuery.toString()
+    const newUrl = getUrlPath(urlString)
     history.replaceState({}, '', newUrl)
   }
 

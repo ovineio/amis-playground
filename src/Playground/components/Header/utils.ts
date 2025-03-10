@@ -1,10 +1,11 @@
 import { saveAs } from 'file-saver'
-import { isPlainObject } from 'lodash'
 
 import AmisLogo from './icons/amis-logo.png'
 import DownloadSvg from './icons/download.svg?raw'
 import GithubSvg from './icons/github.svg?raw'
+import InfoSvg from './icons/info.svg?raw'
 import MoonSvg from './icons/moon.svg?raw'
+import SettingSvg from './icons/setting.svg?raw'
 import ShareSvg from './icons/share.svg?raw'
 import SuccessSvg from './icons/success.svg?raw'
 import SunSvg from './icons/sun.svg?raw'
@@ -30,6 +31,8 @@ export const icons = {
   ShareSvg,
   SunSvg,
   SuccessSvg,
+  InfoSvg,
+  SettingSvg,
 }
 
 const getFilesMap = (files: any) => {

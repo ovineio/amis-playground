@@ -39,5 +39,5 @@ amis 功能多，迭代更新快，配置项数不胜数，文档描述有时模
 
 ## 项目实现参考
 
-- [react-playground](https://github.com/fewismuch/react-playground)
+- [amis-playground](https://github.com/fewismuch/amis-playground)
 - [code-kitchen](https://github.com/freewheel/code-kitchen)

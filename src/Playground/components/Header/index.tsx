@@ -1,7 +1,12 @@
-import { toast } from 'amis-ui'
-import React, { useContext, useRef, useState } from 'react'
+import { toast, TooltipWrapper } from 'amis-ui'
+import axios from 'axios'
+import { get } from 'lodash'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 
+import { AutoRunAction } from './AutoRunAction'
+import { InfoAction } from './InfoAction'
 import { SelectCase } from './SelectCase'
+// import { SettingAction } from './SettingAction'
 import { ShareAction } from './ShareAction'
 import { downloadFiles, icons } from './utils'
 import { renderAmis } from '../Amis'
@@ -9,6 +14,7 @@ import { renderAmis } from '../Amis'
 import styles from './index.module.less'
 
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
+import { dependencies } from '@/Playground/templateAmis/package.json'
 
 export const Header: React.FC = () => {
   const { files, appSetting, changeTheme } = useContext(PlaygroundContext)
@@ -18,6 +24,14 @@ export const Header: React.FC = () => {
   }>({
     shareFormRef: {},
   })
+  const [amisVerInfo, setAmisVerInfo] = useState({
+    npmLatestVer: '',
+    playgroundVer: '6.11.0',
+  })
+
+  useEffect(() => {
+    fetchAmisVer()
+  }, [])
 
   const downloadProject = () => {
     downloadFiles(files).then(() => {
@@ -26,6 +40,16 @@ export const Header: React.FC = () => {
       setTimeout(() => {
         setDownloaded(false)
       }, 3000)
+    })
+  }
+
+  const fetchAmisVer = async () => {
+    const { data } = await axios.get('https://registry.npmmirror.com/amis')
+    const npmLatestVer = get(data, 'dist-tags.latest')
+    const playgroundVer = dependencies.amis || '6.11.0'
+    setAmisVerInfo({
+      npmLatestVer,
+      playgroundVer,
     })
   }
 
@@ -50,35 +74,55 @@ export const Header: React.FC = () => {
         <SelectCase />
       </div>
       <div className={styles.links}>
-        {appSetting.theme === 'light' && (
-          <button
-            title='Toggle dark mode'
-            className={styles.theme}
-            dangerouslySetInnerHTML={{ __html: icons.SunSvg }}
-            onClick={() => changeTheme('dark')}
-          />
-        )}
+        <AutoRunAction />
 
-        {appSetting.theme === 'dark' && (
-          <button
-            title='Toggle light mode'
-            className={styles.theme}
-            dangerouslySetInnerHTML={{ __html: icons.MoonSvg }}
-            onClick={() => changeTheme('light')}
-          />
-        )}
+        <TooltipWrapper
+          placement='bottom'
+          tooltip={`当前使用版本${
+            amisVerInfo.playgroundVer === amisVerInfo.npmLatestVer
+              ? '已是 amis 最新版本'
+              : `落后amis最新版本，amis最新版本为 V${amisVerInfo.npmLatestVer}`
+          }`}
+        >
+          <a target='_blank' href='https://www.npmjs.com/package/amis/v/6.11.0?activeTab=versions'>
+            <button>Amis:V{amisVerInfo.playgroundVer}</button>
+          </a>
+        </TooltipWrapper>
+
+        <InfoAction />
+
+        {/* <SettingAction /> */}
+
+        <TooltipWrapper placement='bottom' tooltip='切换主题'>
+          {appSetting.theme === 'light' ? (
+            <button
+              className={styles.theme}
+              dangerouslySetInnerHTML={{ __html: icons.SunSvg }}
+              onClick={() => changeTheme('dark')}
+            />
+          ) : (
+            <button
+              className={styles.theme}
+              dangerouslySetInnerHTML={{ __html: icons.MoonSvg }}
+              onClick={() => changeTheme('light')}
+            />
+          )}
+        </TooltipWrapper>
 
         <ShareAction storeRef={storeRef} />
 
-        <button
-          title='Download project files'
-          dangerouslySetInnerHTML={{ __html: downloaded ? icons.SuccessSvg : icons.DownloadSvg }}
-          onClick={downloadProject}
-        />
+        <TooltipWrapper placement='bottom' tooltip='下载'>
+          <button
+            dangerouslySetInnerHTML={{ __html: downloaded ? icons.SuccessSvg : icons.DownloadSvg }}
+            onClick={downloadProject}
+          />
+        </TooltipWrapper>
 
-        <a href='https://github.com/ovineio/amis-playground' target='_blank' title='View on GitHub'>
-          <button dangerouslySetInnerHTML={{ __html: icons.GithubSvg }} />
-        </a>
+        <TooltipWrapper placement='bottom' tooltip='Github源码'>
+          <a href='https://github.com/ovineio/amis-playground' target='_blank'>
+            <img src='https://img.shields.io/github/stars/ovineio/amis-playground.svg' />
+          </a>
+        </TooltipWrapper>
       </div>
     </nav>
   )

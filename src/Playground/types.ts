@@ -41,6 +41,8 @@ export interface IEditorContainer {
 
 export interface IOutput {
   files?: any
+  autoRun?: boolean
+  codeRunId?: number
 }
 
 export type IImportMap = { imports: Record<string, string> }
@@ -69,6 +71,7 @@ export type IPlayground = {
 export type ContextAppSetting = AppSetting & {
   initial?: boolean
   shareTitle?: string
+  codeRunId?: number
 }
 export interface IPlaygroundContext {
   files: IFiles

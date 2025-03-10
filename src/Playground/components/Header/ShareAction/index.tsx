@@ -1,10 +1,10 @@
-import { toast, confirm } from 'amis'
+import { toast, confirm, anyChanged, TooltipWrapper } from 'amis'
 import copy from 'copy-to-clipboard'
 import { useContext, useState } from 'react'
 
 import { icons } from '../utils'
 
-import { getShareUrl } from '@/localServer/shareService'
+import { getShareCache, getShareUrl } from '@/localServer/shareService'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 }
 export const ShareAction = (props: Props) => {
   const { storeRef } = props
-  const { files, appSetting, filesHash, changeTheme, setAppSetting } = useContext(PlaygroundContext)
+  const { appSetting, filesHash, setAppSetting } = useContext(PlaygroundContext)
   const [copyed, setCopyed] = useState(false)
   const copyUrl = async (data = {}) => {
     const { title, useShortUrl, expiryDays } = data
@@ -63,12 +63,24 @@ export const ShareAction = (props: Props) => {
   }
 
   const handleShare = async () => {
+    const shareCache = await getShareCache()
+    let shareTitle = appSetting.shareTitle
+
+    // 分享时的数据，与上一次分享的数据对比
+    if (
+      shareCache?.title && // 缓存的标题存在
+      (filesHash === shareCache?.share || // 文件相同
+        !anyChanged(['caseId', 'caseVersion'], appSetting, shareCache)) // 代码版本相同
+    ) {
+      // 将分享的标题设置为上一次分享的标题
+      shareTitle = shareCache?.title
+    }
+
     storeRef.current.shareFormRef.doAction({
       actionType: 'dialog',
       data: {
-        title: appSetting.shareTitle,
+        title: shareTitle,
         useShortUrl: appSetting.shareConfig?.useShortUrl || false,
-        // useShortUrl: false,
         expiryDays: appSetting.shareConfig?.expiryDays || 90,
       },
       dialog: {
@@ -161,10 +173,12 @@ export const ShareAction = (props: Props) => {
   }
 
   return (
-    <button
-      title='Copy sharable URL'
-      dangerouslySetInnerHTML={{ __html: copyed ? icons.SuccessSvg : icons.ShareSvg }}
-      onClick={handleShare}
-    />
+    <TooltipWrapper placement='bottom' tooltip='分享'>
+      <button
+        title='Copy sharable URL'
+        dangerouslySetInnerHTML={{ __html: copyed ? icons.SuccessSvg : icons.ShareSvg }}
+        onClick={handleShare}
+      />
+    </TooltipWrapper>
   )
 }

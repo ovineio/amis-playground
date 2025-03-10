@@ -4,6 +4,7 @@ import { IMPORT_MAP_FILE_NAME, reactTemplateFiles, initFiles } from './templateA
 import { ICustomFiles, IImportMap, ITheme } from './types'
 
 import type { IFiles } from './types'
+import { isPlainObject } from 'lodash'
 
 export function debounce(fn: (...args: any[]) => void, n = 100) {
   let handle: any
@@ -47,12 +48,12 @@ export function hash2json(hash: string): any {
   return JSON.parse(atou(hash))
 }
 
-const STORAGE_DARK_THEME = 'react-playground-prefer-dark'
+const STORAGE_DARK_THEME = 'amis-playground-prefer-dark'
 
 export const setPlaygroundTheme = (theme: ITheme) => {
   localStorage.setItem(STORAGE_DARK_THEME, String(theme === 'dark'))
   document
-    .querySelectorAll('div[data-id="react-playground"]')
+    .querySelectorAll('div[data-id="amis-playground"]')
     ?.forEach((item) => item.setAttribute('class', theme))
 }
 
@@ -128,7 +129,29 @@ export const fileName2Language = (name: string) => {
   return 'javascript'
 }
 
-export const getUrlPath = (queryString: string) => {
-  const urlPath = location.origin + location.pathname + '?' + queryString.replace('?', '')
+export const getUrlPath = (query: any) => {
+  if (!query) {
+    return location.href
+  }
+
+  let queryStr = query
+  if (isPlainObject(query)) {
+    queryStr = new URLSearchParams(query).toString()
+  }
+
+  const { origin, pathname } = location
+  const urlPath = `${origin}${pathname}${queryStr ? `?${queryStr.replace('?', '')}` : ''}`
   return urlPath
+}
+
+export const updateLocation = (url: string, replace = true) => {
+  if (replace) {
+    history.replaceState({}, '', url)
+  } else {
+    history.pushState({}, '', url)
+  }
+}
+
+export const isMac = () => {
+  return navigator.platform.toUpperCase().indexOf('MAC') >= 0
 }

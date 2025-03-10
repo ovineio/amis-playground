@@ -1,29 +1,57 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const loadOverTime = 10 * 1000
 
 export const useTypesProgress = () => {
-  const [progress, setProgress] = useState(0)
-  const [total, setTotal] = useState(0)
+  const [progress, setProgress] = useState({
+    current: 0,
+    total: 0,
+  })
   const [finished, setFinished] = useState(false)
+  const storeRef = useRef({
+    finishedMaxTimer: 0,
+  })
 
-  const onWatch = (typeHelper: any) => {
-    const handleProgress = (progress: number, total: number) => {
-      setProgress(progress)
-      setTotal(total)
-    }
-    typeHelper.addListener('progress', handleProgress)
+  useEffect(() => {
+    return clearFinishedMaxTimer
+  }, [])
 
-    const handleFinished = () => setFinished(true)
-    typeHelper.addListener('finished', handleFinished)
-
-    const handleStarted = () => setFinished(false)
-    typeHelper.addListener('started', handleStarted)
-
-    return () => {
-      typeHelper.removeListener('progress', handleProgress)
-      typeHelper.removeListener('finished', handleFinished)
-      typeHelper.removeListener('started', handleStarted)
+  const clearFinishedMaxTimer = () => {
+    if (storeRef.current.finishedMaxTimer) {
+      clearTimeout(storeRef.current.finishedMaxTimer)
     }
   }
 
-  return { progress, total, finished, onWatch }
+  const onWatch = (typeHelper: any) => {
+    const handleProgress = (current: number, total: number) => {
+      setProgress({
+        current,
+        total,
+      })
+    }
+    typeHelper.addListener('progress', handleProgress)
+
+    const handleFinished = () => {
+      clearFinishedMaxTimer()
+      setFinished(true)
+    }
+    typeHelper.addListener('finished', () => setFinished(true))
+
+    const handleStarted = () => {
+      setFinished(false)
+      clearFinishedMaxTimer()
+      storeRef.current.finishedMaxTimer = setTimeout(() => {
+        handleFinished()
+      }, loadOverTime)
+    }
+    typeHelper.addListener('started', handleStarted)
+
+    return () => {
+      typeHelper.removeListener('started', handleStarted)
+      typeHelper.removeListener('progress', handleProgress)
+      typeHelper.removeListener('finished', handleFinished)
+    }
+  }
+
+  return { ...progress, finished, onWatch }
 }

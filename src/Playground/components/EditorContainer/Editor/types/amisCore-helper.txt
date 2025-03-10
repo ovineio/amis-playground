@@ -1,0 +1,415 @@
+import React from 'react';
+import moment from 'moment';
+import qs from 'qs';
+import type { Schema, PlainObject, FunctionPropertyNames } from '../types';
+import { IIRendererStore } from '../store';
+import { autobindMethod } from './autobind';
+import { cloneObject, createObject, deleteVariable, extendObject, isObject, setVariable } from './object';
+import { string2regExp } from './string2regExp';
+import { getVariable } from './getVariable';
+import { keyToPath } from './keyToPath';
+import type { IStatusStore } from '../store/status';
+export { createObject, cloneObject, isObject, string2regExp, getVariable, setVariable, deleteVariable, keyToPath, extendObject };
+export declare function preventDefault(event: TouchEvent | Event): void;
+export declare function isMobile(): any;
+export declare function range(num: number, min: number, max: number): number;
+/**
+ * 给目标对象添加其他属性，可读取但是不会被遍历。
+ * @param target
+ * @param props
+ */
+export declare function injectPropsToObject(target: any, props: any): any;
+export declare function isSuperDataModified(data: any, prevData: any, store: IIRendererStore): boolean;
+export declare function syncDataFromSuper(data: any, superObject: any, prevSuperObject: any, store: IIRendererStore, force: boolean): any;
+/**
+ * 生成 8 位随机数字。
+ *
+ * @return {string} 8位随机数字
+ */
+export declare function guid(): string;
+export declare function findIndex(arr: Array<any>, detect: (item?: any, index?: number) => boolean): number;
+export declare function hasOwnPropertyInPath(data: {
+    [propName: string]: any;
+}, key: string): boolean;
+export declare function noop(): void;
+export declare function anyChanged(attrs: string | Array<string>, from: {
+    [propName: string]: any;
+}, to: {
+    [propName: string]: any;
+}, strictMode?: boolean): boolean;
+type Mutable<T> = {
+    -readonly [k in keyof T]: T[k];
+};
+export declare function changedEffect<T extends Record<string, any>>(attrs: string | Array<string>, origin: T, data: T, effect: (changes: Partial<Mutable<T>>) => void, strictMode?: boolean): void;
+export declare function rmUndefined(obj: PlainObject): PlainObject;
+export declare function isObjectShallowModified(prev: any, next: any, strictModeOrFunc?: boolean | ((lhs: any, rhs: any) => boolean), ignoreUndefined?: boolean, stack?: Array<any>, maxDepth?: number): boolean;
+export declare function isArrayChildrenModified(prev: Array<any>, next: Array<any>, strictMode?: boolean): boolean;
+export declare function immutableExtends(to: any, from: any, deep?: boolean): any;
+export declare function makeColumnClassBuild(steps: number, classNameTpl?: string): (schema: Schema) => any;
+export declare function hasVisibleExpression(schema: {
+    visibleOn?: string;
+    hiddenOn?: string;
+    visible?: boolean;
+    hidden?: boolean;
+}): boolean;
+export declare function isVisible(schema: {
+    id?: string;
+    name?: string;
+    visibleOn?: string;
+    hiddenOn?: string;
+    visible?: boolean;
+    hidden?: boolean;
+}, data?: object, statusStore?: IStatusStore): any;
+export declare function isUnfolded(node: any, config: {
+    foldedField?: string;
+    unfoldedField?: string;
+}): boolean;
+/**
+ * 过滤掉被隐藏的数组元素
+ */
+export declare function visibilityFilter(items: any, data?: object): any;
+export declare function isDisabled(schema: {
+    disabledOn?: string;
+    disabled?: boolean;
+}, data?: object): boolean | "" | Promise<boolean> | undefined;
+export declare function hasAbility(schema: any, ability: string, data?: object, defaultValue?: boolean): boolean;
+export declare function makeHorizontalDeeper(horizontal: {
+    left: string;
+    right: string;
+    offset: string;
+    leftFixed?: any;
+}, count: number): {
+    left: string | number;
+    right: string | number;
+    offset: string | number;
+    leftFixed?: any;
+};
+export declare function promisify<T extends Function>(fn: T): (...args: Array<any>) => Promise<any> & {
+    raw: T;
+};
+/**
+ *
+ * @param node 当前元素
+ * @param compute 自定义计算，找到的父元素是否满足特殊场景
+ * @returns 返回控制当前元素滚动的父元素
+ */
+export declare function getScrollParent(node: HTMLElement, compute?: (parent: HTMLElement) => boolean): HTMLElement | null;
+/**
+ * Deep diff between two object, using lodash
+ * @param  {Object} object Object compared
+ * @param  {Object} base   Object to compare with
+ * @return {Object}        Return a new object who represent the diff
+ */
+export declare function difference<T extends {
+    [propName: string]: any;
+}, U extends {
+    [propName: string]: any;
+}>(object: T, base: U, keepProps?: Array<string>): {
+    [propName: string]: any;
+};
+export declare const padArr: (arr: Array<any>, size?: number, fillUndefined?: boolean) => Array<Array<any>>;
+export declare function __uri(id: string): string;
+export declare function isBreakpoint(str: string): boolean;
+export declare function until(fn: () => Promise<any>, when: (ret: any) => boolean, getCanceler: (fn: () => any) => void, interval?: number): Promise<unknown>;
+export declare function omitControls(controls: Array<any>, omitItems: Array<string>): Array<any>;
+export declare function isEmpty(thing: any): boolean;
+/**
+ * 基于时间戳的 uuid
+ *
+ * @returns uniqueId
+ */
+export declare const uuid: () => string;
+export declare const uuidv4: () => string;
+export interface TreeItem {
+    children?: TreeArray;
+    [propName: string]: any;
+}
+export interface TreeArray extends Array<TreeItem> {
+}
+/**
+ * 类似于 arr.map 方法，此方法主要针对类似下面示例的树形结构。
+ * [
+ *     {
+ *         children: []
+ *     },
+ *     // 其他成员
+ * ]
+ *
+ * @param {Tree} tree 树形数据
+ * @param {Function} iterator 处理函数，返回的数据会被替换成新的。
+ * @return {Tree} 返回处理过的 tree
+ */
+export declare function mapTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>, indexes: Array<number>) => T, level?: number, depthFirst?: boolean, paths?: Array<T>, indexes?: Array<number>): any[];
+/**
+ * 遍历树
+ * @param tree
+ * @param iterator
+ */
+export declare function eachTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths?: Array<T>) => any, level?: number, paths?: Array<T>): void;
+export declare function findTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>) => any, withCache?: {
+    value: string | number;
+    resolve?: (treeItem: T) => any;
+    foundEffect?: (item: T, key: number, level: number, paths?: Array<T>) => any;
+}): T | null;
+/**
+ * 在树中查找节点。
+ * @param tree
+ * @param iterator
+ */
+export declare function findTreeAll<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>) => any): Array<T>;
+/**
+ * 在树中查找节点, 返回下标数组。
+ * @param tree
+ * @param iterator
+ * @param withCache {Object} 启用缓存（new Map()），多次重复从一颗树中查找时可大幅度提升性能
+ * @param withCache.value {any} 必须，需要从缓存Map中匹配的值，使用Map.get(value) 匹配
+ * @param withCache.resolve {function} 构建Map 时，存入key 的处理函数
+ */
+export declare function findTreeIndex<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>) => any, withCache?: {
+    resolve?: (treeItem: T) => any;
+    value: any;
+}): Array<number> | undefined;
+export declare function getTree<T extends TreeItem>(tree: Array<T>, idx: Array<number> | number): T | undefined | null;
+/**
+ * 过滤树节点
+ *
+ * @param tree
+ * @param iterator
+ */
+export declare function filterTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>) => any, level?: number, depthFirst?: boolean, paths?: Array<T>): T[];
+/**
+ * 判断树中每个节点是否满足某个条件。
+ * @param tree
+ * @param iterator
+ */
+export declare function everyTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>, indexes: Array<number>) => boolean, level?: number, paths?: Array<T>, indexes?: Array<number>): boolean;
+/**
+ * 判断树中是否有某些节点满足某个条件。
+ * @param tree
+ * @param iterator
+ */
+export declare function someTree<T extends TreeItem>(tree: Array<T>, iterator: (item: T, key: number, level: number, paths: Array<T>) => boolean): boolean;
+/**
+ * 将树打平变成一维数组，可以传入第二个参数实现打平节点中的其他属性。
+ *
+ * 比如：
+ *
+ * flattenTree([
+ *     {
+ *         id: 1,
+ *         children: [
+ *              { id: 2 },
+ *              { id: 3 },
+ *         ]
+ *     }
+ * ], item => item.id); // 输出为 [1, 2, 3]
+ *
+ * @param tree
+ * @param mapper
+ */
+export declare function flattenTree<T extends TreeItem>(tree: Array<T>): Array<T>;
+export declare function flattenTree<T extends TreeItem, U>(tree: Array<T>, mapper: (value: T, index: number, level: number, paths?: Array<T>) => U): Array<U>;
+/**
+ * 将树打平变成一维数组，用法和flattenTree类似，区别是结果仅保留叶节点
+ *
+ * 比如：
+ *
+ * flattenTreeWithLeafNodes([
+ *     {
+ *         id: 1,
+ *         children: [
+ *              { id: 2 },
+ *              { id: 3 },
+ *         ]
+ *     }
+ * ], item => item.id); // 输出为 [2, 3]
+ *
+ * @param tree
+ * @param mapper
+ */
+export declare function flattenTreeWithLeafNodes<T extends TreeItem>(tree: Array<T>): Array<T>;
+export declare function flattenTreeWithLeafNodes<T extends TreeItem, U>(tree: Array<T>, mapper: (value: T, index: number) => U): Array<U>;
+/**
+ * 操作树，遵循 imutable, 每次返回一个新的树。
+ * 类似数组的 splice 不同的地方这个方法不修改原始数据，
+ * 同时第二个参数不是下标，而是下标数组，分别代表每一层的下标。
+ *
+ * 至于如何获取下标数组，请查看 findTreeIndex
+ *
+ * @param tree
+ * @param idx
+ * @param deleteCount
+ * @param ...items
+ */
+export declare function spliceTree<T extends TreeItem>(tree: Array<T>, idx: Array<number> | number, deleteCount?: number, ...items: Array<T>): Array<T>;
+/**
+ * 计算树的深度
+ * @param tree
+ */
+export declare function getTreeDepth<T extends TreeItem>(tree: Array<T>): number;
+/**
+ * 从树中获取某个值的所有祖先
+ * @param tree
+ * @param value
+ */
+export declare function getTreeAncestors<T extends TreeItem>(tree: Array<T>, value: T, includeSelf?: boolean): Array<T> | null;
+/**
+ * 从树中获取某个值的上级
+ * @param tree
+ * @param value
+ */
+export declare function getTreeParent<T extends TreeItem>(tree: Array<T>, value: T): T | null;
+export declare function countTree<T extends TreeItem>(tree: Array<T>, iterator?: (item: T, key: number, level: number, paths?: Array<T>) => any): number;
+export declare function ucFirst(str?: string): string | undefined;
+export declare function lcFirst(str?: string): string;
+export declare function camel(str?: string): string;
+export declare function getWidthRate(value: any, strictMode?: boolean): number;
+export declare function getLevelFromClassName(value: string, defaultValue?: string): string;
+export declare function pickEventsProps(props: any): any;
+export declare const autobind: typeof autobindMethod;
+export declare const bulkBindFunctions: <T extends {
+    [propName: string]: any;
+}>(context: T, funNames: FunctionPropertyNames<T>[]) => void;
+export declare function sortArray<T extends any>(items: Array<T>, field: string, dir: -1 | 1, fieldGetter?: (item: T, field: string) => any): Array<T>;
+export declare function applyFilters<T extends any>(items: Array<T>, options: {
+    query: any;
+    columns?: Array<any>;
+    matchFunc?: Function | null;
+    filterOnAllColumns?: boolean;
+}): T[];
+export declare function hasFile(object: any): boolean;
+export declare function qsstringify(data: any, options?: any, keepEmptyArray?: boolean): string;
+export declare function qsparse(data: string, options?: any): qs.ParsedQs;
+export declare function object2formData(data: any, options?: any, fd?: FormData): any;
+export declare function chainFunctions(...fns: Array<(...args: Array<any>) => void>): (...args: Array<any>) => void;
+export declare function chainEvents(props: any, schema: any): any;
+export declare function mapObject(value: any, valueMapper: (value: any) => any, skipFn?: (value: any) => boolean, keyMapper?: (key: string) => string): any;
+export declare function loadScript(src: string): Promise<void>;
+export declare function loadStyle(href: string): Promise<void>;
+export declare class SkipOperation extends Error {
+}
+export declare class ValidateError extends Error {
+    name: 'ValidateError';
+    detail: {
+        [propName: string]: Array<string> | string;
+    };
+    rawError?: {
+        [propName: string]: any;
+    };
+    constructor(message: string, error: {
+        [propName: string]: Array<string> | string;
+    }, rawError?: {
+        [propName: string]: any;
+    });
+}
+/**
+ * 深度查找具有某个 key 名字段的对象，实际实现是 internalFindObjectsWithKey，这里包一层是为了做循环引用检测
+ * @param obj
+ * @param key
+ */
+export declare function findObjectsWithKey(obj: any, key: string): any[];
+/**
+ * 获取浏览器滚动条宽度 https://stackoverflow.com/a/13382873
+ */
+export declare function getScrollbarWidth(): number;
+export declare function getPropValue<T extends {
+    value?: any;
+    name?: string;
+    data?: any;
+    defaultValue?: any;
+    canAccessSuperData?: boolean;
+}>(props: T, getter?: (props: T) => any, canAccessSuper?: boolean | undefined): any;
+export declare function detectPropValueChanged<T extends {
+    value?: any;
+    name?: string;
+    data?: any;
+    defaultValue?: any;
+}>(props: T, prevProps: T, onChange: (value: any) => void, getter?: (props: T) => any): void;
+export declare function removeHTMLTag(str: string): string;
+/**
+ * 将路径格式的value转换成普通格式的value值
+ *
+ * @example
+ *
+ * 'a/b/c' => 'c';
+ * {label: 'A/B/C', value: 'a/b/c'} => {label: 'C', value: 'c'};
+ * 'a/b/c,a/d' => 'c,d';
+ * ['a/b/c', 'a/d'] => ['c', 'd'];
+ * [{label: 'A/B/C', value: 'a/b/c'},{label: 'A/D', value: 'a/d'}] => [{label: 'C', value: 'c'},{label: 'D', value: 'd'}]
+ */
+export declare function normalizeNodePath(value: any, enableNodePath: boolean, labelField?: string, valueField?: string, pathSeparator?: string, delimiter?: string): {
+    nodeValueArray: any[];
+    nodePathArray: any[];
+};
+export declare function isClickOnInput(e: React.MouseEvent<HTMLElement>): boolean;
+export declare function hashCode(s: string): number;
+/**
+ * 遍历 schema
+ * @param json
+ * @param mapper
+ */
+export declare function JSONTraverse(json: any, mapper: (value: any, key: string | number, host: Object) => any, maxDeep?: number): void;
+/**
+ * 每层都会执行，返回新的对象，新对象不会递归下去
+ * @param json
+ * @param mapper
+ * @returns
+ */
+export declare function JSONValueMap(json: any, mapper: (value: any, key: string | number, host: Object, stack: Array<Object>) => any, deepFirst?: boolean, stack?: Array<Object>): any;
+export declare function convertArrayValueToMoment(value: number[], types: string[], mom: moment.Moment): moment.Moment;
+export declare function getRange(min: number, max: number, step?: number): number[];
+export declare function repeatCount(count: number, iterator: (index: number) => any): any[];
+export declare function isNumeric(value: any): boolean;
+export type PrimitiveTypes = 'boolean' | 'number';
+/**
+ * 解析Query字符串中的原始类型，目前仅支持转化布尔类型
+ *
+ * @param query 查询字符串
+ * @param options 配置参数
+ * @returns 解析后的查询字符串
+ */
+export declare function parsePrimitiveQueryString(rawQuery: Record<string, any>, options?: {
+    primitiveTypes: PrimitiveTypes[];
+}): any;
+/**
+ * 获取URL链接中的query参数（包含hash mode）
+ *
+ * @param location Location对象，或者类Location结构的对象
+ * @param {Object} options 配置项
+ * @param {Boolean} options.parsePrimitive 是否将query的值解析为原始类型，目前仅支持转化布尔类型
+ */
+export declare function parseQuery(location?: Location | {
+    query?: any;
+    search?: any;
+    [propName: string]: any;
+}, options?: {
+    parsePrimitive?: boolean;
+    primitiveTypes?: PrimitiveTypes[];
+}): Record<string, any>;
+export declare function differenceFromAll<T>(allOptions: Array<T>, options: Array<T>, getValue: (item: T) => any): Array<T>;
+/**
+ * 基于 schema 自动提取 trackExpression
+ * 可能会不准确，建议用户自己配置
+ * @param schema
+ * @returns
+ */
+export declare function buildTrackExpression(schema: any): string;
+export declare function evalTrackExpression(expression: string, data: Record<string, any>): string;
+export declare function importLazyComponent(mod: any): any;
+export declare function replaceUrlParams(path: string, params: Record<string, any>): string;
+export declare const TEST_ID_KEY: 'data-testid';
+export declare class TestIdBuilder {
+    testId?: string;
+    static fast(testId: string): {
+        "data-testid": string;
+    };
+    constructor(testId?: string);
+    getChild(childPath: string | number, data?: object): TestIdBuilder;
+    getTestId(data?: object): {
+        "data-testid": string;
+    } | undefined;
+    getTestIdValue(data?: object): string | undefined;
+}
+export declare function supportsMjs(): boolean;
+export declare function formateId(id: string): string;
+export declare function formateCheckThemeCss(themeCss: any, type: string): any;

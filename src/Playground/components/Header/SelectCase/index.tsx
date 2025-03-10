@@ -1,5 +1,7 @@
-import { findTree, uuidv4 } from 'amis-core'
-import { confirm } from 'amis-ui'
+/**
+ * 示例选择下拉框
+ */
+import { uuidv4 } from 'amis-core'
 import { get, last } from 'lodash'
 import { useContext, useRef } from 'react'
 
@@ -12,12 +14,12 @@ import styles from './index.module.less'
 import {
   caseType,
   delCaseVersion,
-  getCasesTree,
   getCaseVersions,
   updateCaseTree,
 } from '@/localServer/caseService'
 import { renderAmis } from '@/Playground/components/Amis'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
+import { getUrlPath, updateLocation } from '@/Playground/utils'
 
 export const SelectCase = () => {
   const { appSetting, setFiles, setAppSetting, filesHash } = useContext(PlaygroundContext)
@@ -198,16 +200,25 @@ export const SelectCase = () => {
     await setAppSetting({
       caseId,
       caseVersion,
-      shareTitle: `${document.querySelector<HTMLSpanElement>('.casePicker_caseId .cxd-ResultBox-singleValue')
+      shareTitle: `${
+        document.querySelector<HTMLSpanElement>('.casePicker_caseId .cxd-ResultBox-singleValue')
           ?.innerText || '示例'
-        } @ ${document.querySelector<HTMLSpanElement>('.casePicker_caseVersion .cxd-Select-value')
+      } @ ${
+        document.querySelector<HTMLSpanElement>('.casePicker_caseVersion .cxd-Select-value')
           ?.innerText || 'V1'
-        }`,
+      }`,
       activeFileTab: fileName ? activeFileTab : Object.keys(files)[0],
     })
 
     storeRef.current.pristineFilesHash = pristineFilesHash
     setFiles(files)
+
+    updateLocation(
+      getUrlPath({
+        caseId,
+        caseVersion,
+      })
+    )
   }
 
   const setCurrVerPristine = async (
@@ -290,9 +301,9 @@ export const SelectCase = () => {
       onlyVersion
         ? false
         : {
-          type: 'reload',
-          id: 'casePicker_caseVersion',
-        },
+            type: 'reload',
+            id: 'casePicker_caseVersion',
+          },
       {
         type: 'close',
         id: 'deleteCaseDialog',

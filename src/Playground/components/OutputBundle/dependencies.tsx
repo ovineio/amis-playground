@@ -6,6 +6,7 @@ import * as copyToClipboard from 'copy-to-clipboard'
 import * as fakerest from 'fakerest'
 import * as lodash from 'lodash'
 import Mock from 'mockjs'
+import moment from 'moment'
 import * as React from 'react'
 import * as reactRouter from 'react-router'
 import * as reactRouterDom from 'react-router-dom'
@@ -13,6 +14,7 @@ import sinon from 'sinon'
 
 import 'amis/lib/themes/cxd.css'
 import 'amis/lib/helper.css'
+import '@/Playground/templateAmis/public/iconfont.css'
 
 const dependencies = {
   react: React,
@@ -22,6 +24,7 @@ const dependencies = {
   fakerest,
   mockjs: Mock,
   sinon,
+  moment,
   'amis-core': amisCore,
   'amis-ui': amisUi,
   'copy-to-clipboard': copyToClipboard,

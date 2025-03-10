@@ -14,7 +14,13 @@ import { getCustomActiveFile, getMergedCustomFiles, getPlaygroundTheme } from '.
 import type { IPlayground } from './types'
 
 import './index.less'
-import { addNewVersion, initCaseTree, checkFilesChangeByVerId, updateVersionLabel } from '@/localServer/caseService'
+import {
+  addNewVersion,
+  initCaseTree,
+  checkFilesChangeByVerId,
+  updateVersionLabel,
+  caseType,
+} from '@/localServer/caseService'
 import { defCaseId } from '@/localServer/caseService/defaultCase'
 import { getAppSetting } from '@/localServer/settingService'
 import { getShareFormUrl } from '@/localServer/shareService'
@@ -38,10 +44,16 @@ const ReactPlayground = (props: IPlayground) => {
     border = false,
     defaultSizes,
     onFilesChange,
-    autorun = true,
   } = props
-  const { filesHash, changeTheme, files, setFiles, setSelectedFileName, setAppSetting } =
-    useContext(PlaygroundContext)
+  const {
+    appSetting,
+    filesHash,
+    changeTheme,
+    files,
+    setFiles,
+    setSelectedFileName,
+    setAppSetting,
+  } = useContext(PlaygroundContext)
   const options = Object.assign(defaultCodeSandboxOptions, props.options || {})
 
   useEffect(() => {
@@ -77,6 +89,10 @@ const ReactPlayground = (props: IPlayground) => {
     let caseId = appSetting.caseId || 'baseSimple'
     let caseVersion = appSetting.caseVersion || 1
 
+    /**
+     *  start: 处理分享相关逻辑
+     *  TODO: 将z这整块单独抽离一个方法
+     */
     const shareData = await getShareFormUrl()
 
     if (shareData?.isShortUrlExpired) {
@@ -133,6 +149,23 @@ const ReactPlayground = (props: IPlayground) => {
         await updateVersionLabel(caseId, caseVersion, getVerDefLabel())
       }
     }
+    // end
+
+    /**
+     * start: 官方提供的示例，可从URL上进行分享打开
+     */
+    const query = new URLSearchParams(location.search)
+    const queryCaseId = query.get('caseId')
+    const queryCaseVersion = query.get('caseId')
+    if (
+      queryCaseId &&
+      queryCaseVersion &&
+      caseType.officialPristine(queryCaseId, queryCaseVersion)
+    ) {
+      caseId = queryCaseId
+      caseVersion = parseInt(queryCaseVersion)
+    }
+    // end
 
     if (caseId && caseVersion) {
       appSetting = {
@@ -154,7 +187,7 @@ const ReactPlayground = (props: IPlayground) => {
 
   return (
     <div
-      data-id='react-playground'
+      data-id='amis-playground'
       className={theme}
       style={{
         width,
@@ -171,7 +204,11 @@ const ReactPlayground = (props: IPlayground) => {
             showFileSelector={showFileSelector}
             fileSelectorReadOnly={fileSelectorReadOnly}
           />
-          {autorun ? <OutputBundle files={files} /> : null}
+          <OutputBundle
+            autoRun={appSetting.autoRun}
+            codeRunId={appSetting.codeRunId}
+            files={files}
+          />
         </SplitPane>
       </div>
     </div>

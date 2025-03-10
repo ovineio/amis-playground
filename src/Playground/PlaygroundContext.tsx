@@ -27,6 +27,8 @@ export const PlaygroundProvider = (props: {
     initial: false,
     theme: 'light',
     shareTitle: '',
+    autoRun: true,
+    codeRunId: 0,
     activeFileTab: MAIN_FILE_NAME,
   })
 
@@ -78,8 +80,8 @@ export const PlaygroundProvider = (props: {
     }
   }, [files])
 
-  const setAppSetting = async (setting = {}) => {
-    const { initial, shareTitle, ...rest } = setting
+  const setAppSetting = async (setting: ContextAppSetting) => {
+    const { initial, shareTitle, codeRunId, ...rest } = setting
     _setAppSetting((pre) => ({
       ...pre,
       ...setting,

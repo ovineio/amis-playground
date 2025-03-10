@@ -11,7 +11,8 @@ export type AppSetting = {
   caseVersion: number
   splitPanelWidth: number
   activeFileTab: string
-  theme: string,
+  theme: string
+  autoRun: boolean
   shareConfig: {
     useShortUrl: string
     expiryDays: number

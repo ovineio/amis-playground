@@ -1,5 +1,5 @@
 {
-  "name": "react-playground",
+  "name": "amis-playground",
   "author": "fewismuch",
   "version": "1.0.0",
   "type": "module",
@@ -12,15 +12,21 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router": "5.2.1",
+    "react-router-dom": "5.3.0",
     "amis": "6.11.0",
     "amis-core": "6.11.0",
     "amis-ui": "6.11.0",
     "axios": "1.7.9",
-    "react-router": "5.2.1",
-    "react-router-dom": "5.3.0",
-    "copy-to-clipboard": "3.3.1"
+    "copy-to-clipboard": "3.3.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.19.4",
+    "mockjs": "^1.1.0",
+    "fakerest": "^4.1.2",
+    "sinon": "^19.0.2"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.175",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

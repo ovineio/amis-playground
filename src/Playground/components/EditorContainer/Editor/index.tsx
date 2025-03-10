@@ -35,6 +35,8 @@ const EditorInner: React.FC<Props> = (props: Props) => {
     editor: null as any,
     monaco: null as any,
     typeHelper: null as any,
+    autoRun: false,
+    codeRunId: 0,
   })
   const jsxSyntaxHighlightRef = useRef<any>({ highlighter: null, dispose: null })
 
@@ -44,9 +46,17 @@ const EditorInner: React.FC<Props> = (props: Props) => {
   const handleEditorDidMount = async (editor: any, monaco: Monaco) => {
     editorRef.current.editor = editor
     editorRef.current.monaco = monaco
-    // ignore save event
+    // ignore Ctrl+S
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      editor.getAction('editor.action.formatDocument').run()
+      window.postMessage({
+        action: 'Ctrl+S',
+      })
+    })
+    // ignore Ctrl+E
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE, () => {
+      window.postMessage({
+        action: 'Ctrl+E',
+      })
     })
 
     // 初始化自定义文件model
@@ -110,7 +120,7 @@ const EditorInner: React.FC<Props> = (props: Props) => {
   return (
     <>
       <MonacoEditor
-        className='react-playground-editor'
+        className='amis-playground-editor'
         height='100%'
         theme={`vs-${theme}`}
         path={fileName}
@@ -127,7 +137,7 @@ const EditorInner: React.FC<Props> = (props: Props) => {
           },
         }}
       />
-      <div className='react-playground-editor-types-loading'>
+      <div className='amis-playground-editor-types-loading'>
         {total > 0 ? <Loading finished={finished} /> : null}
       </div>
     </>

@@ -1,0 +1,38 @@
+.tooltipWrapper {
+  width: 320px;
+  max-width: 320px !important;
+}
+
+.infoPanel {
+  height: auto;
+  word-break: break-all;
+
+  .desc {
+    font-size: 12px;
+    color: #888;
+    position: relative;
+    top: -14px;
+  }
+
+  h6 {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  ul {
+    margin: 0 0 0 15px;
+    li {
+      margin-bottom: 10px;
+    }
+  }
+
+  :global {
+    .string-value {
+      cursor: pointer;
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+}

@@ -12,7 +12,7 @@ import { isString, omit } from 'lodash'
 
 import { caseType, getCaseFiles, getCaseVersions } from './caseService'
 
-import { getUrlPath } from '@/Playground/utils'
+import { getUrlPath, updateLocation } from '@/Playground/utils'
 
 const dbKey = {
   appShareCache: 'app_share_cache',
@@ -241,9 +241,7 @@ export const getShareFormUrl = async () => {
         urlQuery.delete(key)
       })
 
-    const urlString = urlQuery.toString()
-    const newUrl = getUrlPath(urlString)
-    history.replaceState({}, '', newUrl)
+    updateLocation(getUrlPath(urlQuery.toString()))
   }
 
   if (!shareData.shareId && !shareData.share) {

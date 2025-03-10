@@ -1,4 +1,4 @@
-import { toast, confirm, anyChanged } from 'amis'
+import { toast, confirm, anyChanged, TooltipWrapper } from 'amis'
 import copy from 'copy-to-clipboard'
 import { useContext, useState } from 'react'
 
@@ -173,10 +173,12 @@ export const ShareAction = (props: Props) => {
   }
 
   return (
-    <button
-      title='Copy sharable URL'
-      dangerouslySetInnerHTML={{ __html: copyed ? icons.SuccessSvg : icons.ShareSvg }}
-      onClick={handleShare}
-    />
+    <TooltipWrapper placement='bottom' tooltip='分享'>
+      <button
+        title='Copy sharable URL'
+        dangerouslySetInnerHTML={{ __html: copyed ? icons.SuccessSvg : icons.ShareSvg }}
+        onClick={handleShare}
+      />
+    </TooltipWrapper>
   )
 }

@@ -24,28 +24,40 @@
   .links {
     display: flex;
     height: 100%;
+    align-items: center;
     margin-left: auto;
+    gap: 10px;
+
+    .greenColor {
+      color: green;
+    }
+    
+    a {
+      color: inherit;
+    }
 
     button {
       display: flex;
-      width: 34px;
-      height: 100%;
-      padding: 0 6px;
-      margin-left: 4px;
       cursor: pointer;
       background-color: transparent;
       border: none;
       outline: none;
       align-items: center;
+      color: #666;
+      &:hover {
+        color: var(--primary);
+        > svg {
+          color: var(--primary);
+        }
+      }
     }
 
     button > svg {
-      color: #666;
-    }
-
-    button.theme > svg {
       width: 18px;
       height: 18px;
+    }
+    img {
+      display: block;
     }
   }
 }

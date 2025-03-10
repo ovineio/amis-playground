@@ -22,7 +22,7 @@ import {
 registerFilter('app_disabledCaseRemove', (data) => {
   const { caseId, caseVersion } = data
 
-  // 官方定义的示例必须保留1个v1不能被删（用于回退为官方示例）
+  // 官方定义的示例必须保留1个，v1不能被删（用于回退为官方示例）
   const officialCheck = caseType.officialPristine(caseId, caseVersion)
   // 分享的内容可以被被全部删除
   const disableRemove = caseType.formShare(caseId) ? false : officialCheck
@@ -105,13 +105,19 @@ export const getVersionUpdateAction = (options: {
         if (item.disabled) {
           return false
         }
+
         // 默认: 选中最后一个可用版本（没有默认选中最新新增版本，原因：防止过度新建版本）
         if (item.desc) {
           defSelectItem = item
         }
 
-        // 如果是首次进入场景，则选中当前选中的
-        if (!changeByCaseId && item.value === caseVersion) {
+        // 如果是首次进入场景
+        if (!changeByCaseId) {
+          // 预设版本不允许覆盖
+          if (caseType.officialPristine(caseId, item.value)) {
+            return false
+          }
+          // 不是预设版本，则选中当前选中的
           defSelectItem = item
           return true
         }
@@ -421,6 +427,7 @@ export const getNewVersionDialog = (options = {}) => {
                 source: '${caseVersionOptions}',
                 autoFill: {
                   versionDsc: '${desc}',
+                  versionDisabled: '${disabled}',
                 },
               },
               {
@@ -430,6 +437,7 @@ export const getNewVersionDialog = (options = {}) => {
                 clearable: true,
                 showCounter: true,
                 maxLength: 12,
+                disabledOn: '${versionDisabled}',
                 placeholder: '请输入版本描述',
               },
             ],

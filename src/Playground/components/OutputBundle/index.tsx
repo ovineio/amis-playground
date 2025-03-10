@@ -5,7 +5,8 @@
  * 3. 使用 直接使用 esbuild 编译+预览 （放弃 1,2 的iframe这套）
  */
 
-import React, { useMemo } from 'react'
+import { anyChanged } from 'amis-core'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { usePreviewComponent } from './bundler'
 import dependencies from './dependencies'
@@ -30,17 +31,34 @@ const customRequire = (key: any) => {
 }
 
 const propsAreEqual = (prevProps: IOutput, nextProps: IOutput) => {
-  const isSame = prevProps.files === nextProps.files
+  const isSame = !anyChanged(['files', 'autoRun', 'codeRunId'], prevProps, nextProps)
   return isSame
 }
 
 const OutputBundle: React.FC<IOutput> = (props) => {
-  const { files } = props
+  const { files, codeRunId, autoRun } = props
+
+  const storeRef = useRef<{ filesArr: any; codeRunId: number; compileTimer: any }>({
+    codeRunId: 0,
+    filesArr: [],
+    compileTimer: 0,
+  })
+
+  useEffect(() => {
+    storeRef.current.codeRunId = codeRunId || 0
+  })
+
+  const codeIdChange = storeRef.current.codeRunId !== codeRunId
+  const isNotAutoRun = !autoRun && storeRef.current.filesArr.length
 
   const filesArr = useMemo(() => {
     const appFile = files[MAIN_FILE_NAME]
     if (!appFile) {
       return []
+    }
+
+    if (isNotAutoRun && !codeIdChange) {
+      return storeRef.current.filesArr
     }
 
     const result = [
@@ -60,10 +78,27 @@ const OutputBundle: React.FC<IOutput> = (props) => {
       }
     })
 
+    storeRef.current.filesArr = result
+
     return result
-  }, [files])
+  }, [files, autoRun, codeRunId])
 
   const { Preview, bundling, error } = usePreviewComponent(internalId, filesArr, customRequire)
+
+  // 保持 Ctrl+S 最少350ms 动画展示
+  const [compiling, setCompiling] = useState(false)
+  useEffect(() => {
+    if (storeRef.current.compileTimer) {
+      clearTimeout(storeRef.current.compileTimer)
+    }
+
+    setCompiling(true)
+    storeRef.current.compileTimer = setTimeout(() => {
+      if (storeRef) {
+        setCompiling(false)
+      }
+    }, 350)
+  }, [codeIdChange])
 
   return (
     <div className={styles.panelWrapper}>
@@ -75,6 +110,11 @@ const OutputBundle: React.FC<IOutput> = (props) => {
         Preview && <Preview />
       )}
       <Message type='error' context={error} />
+      {compiling && (
+        <div className={styles.compileLoading}>
+          <Loading />
+        </div>
+      )}
     </div>
   )
 }

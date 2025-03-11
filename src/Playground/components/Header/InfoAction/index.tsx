@@ -51,7 +51,7 @@ export const InfoAction = () => {
             target='_blank'
             href='https://github.com/ovineio/amis-playground/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen'
           >
-            提issue >>
+            提issue
           </a>
         </p>
         <h6>功能说明</h6>

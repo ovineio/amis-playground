@@ -12,7 +12,7 @@ const env = {
   fetcher: async (api) => {
     let { url, config, ...restApi } = api
 
-    // url是"/amis/" 开头的，都转换到 amis 文档的 api
+    // url是"/amis/" 开头的，都转换到 amis 文档的 api (方便直接复制amis官网schema)
     if (typeof url === 'string' && url.startsWith('/amis/')) {
       url = url.replace(/^\/amis\//, 'https://aisuda.bce.baidu.com/amis/')
     }

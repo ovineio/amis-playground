@@ -1,0 +1,402 @@
+/// <reference types="lodash" />
+import React from 'react';
+import { RendererProps } from '../factory';
+import { IFormStore } from '../store/form';
+import { SchemaNode, ActionObject, ClassName, BaseApiObject, SchemaExpression, SchemaClassName, DataChangeReason } from '../types';
+import { IScopedContext } from '../Scoped';
+import type { LabelAlign } from './Item';
+export interface FormHorizontal {
+    left?: number;
+    right?: number;
+    leftFixed?: boolean | number | 'xs' | 'sm' | 'md' | 'lg';
+    justify?: boolean;
+    labelAlign?: 'left' | 'right';
+    /** label自定义宽度，默认单位为px */
+    labelWidth?: number | string;
+}
+export interface FormSchemaBase {
+    /**
+     * 表单标题
+     */
+    title?: string;
+    /**
+     * 按钮集合，会固定在底部显示。
+     */
+    actions?: Array<any>;
+    /**
+     * 表单项集合
+     */
+    body?: any;
+    /**
+     * @deprecated 请用类型 tabs
+     */
+    tabs?: any;
+    /**
+     * @deprecated 请用类型 fieldSet
+     */
+    fieldSet?: any;
+    data?: any;
+    /**
+     * 是否开启调试，开启后会在顶部实时显示表单项数据。
+     */
+    debug?: boolean;
+    /**
+     * Debug面板配置
+     */
+    debugConfig?: {
+        /**
+         * 默认展开的级别
+         */
+        levelExpand?: number;
+        /**
+         * 是否可复制
+         */
+        enableClipboard?: boolean;
+        /**
+         * 图标风格
+         */
+        iconStyle?: 'square' | 'circle' | 'triangle';
+        /**
+         * 是否显示键的引号
+         */
+        quotesOnKeys?: boolean;
+        /**
+         * 是否为键排序
+         */
+        sortKeys?: boolean;
+        /**
+         * 设置字符串的最大展示长度，超出长度阈值的字符串将被截断，点击value可切换字符串展示方式，默认为120
+         */
+        ellipsisThreshold?: number | false;
+    };
+    /**
+     * 用来初始化表单数据
+     */
+    initApi?: string | BaseApiObject;
+    /**
+     * Form 用来获取初始数据的 api,与initApi不同的是，会一直轮询请求该接口，直到返回 finished 属性为 true 才 结束。
+     */
+    initAsyncApi?: string | BaseApiObject;
+    /**
+     * 设置了initAsyncApi后，默认会从返回数据的data.finished来判断是否完成，也可以设置成其他的xxx，就会从data.xxx中获取
+     */
+    initFinishedField?: string;
+    /**
+     * 设置了initAsyncApi以后，默认拉取的时间间隔
+     */
+    initCheckInterval?: number;
+    /**
+     * 是否初始加载
+     */
+    initFetch?: boolean;
+    /**
+     * 建议改成 api 的 sendOn 属性。
+     */
+    initFetchOn?: string;
+    /**
+     * 设置后将轮询调用 initApi
+     */
+    interval?: number;
+    /**
+     * 是否静默拉取
+     */
+    silentPolling?: boolean;
+    /**
+     * 配置停止轮询的条件
+     */
+    stopAutoRefreshWhen?: string;
+    /**
+     * 是否开启本地缓存
+     */
+    persistData?: string;
+    /**
+     * 开启本地缓存后限制保存哪些 key
+     */
+    persistDataKeys?: string[];
+    /**
+     * 提交成功后清空本地缓存
+     */
+    clearPersistDataAfterSubmit?: boolean;
+    /**
+     * Form 用来保存数据的 api。
+     *
+     * 详情：https://aisuda.bce.baidu.com/amis/zh-CN/components/form/index#%E8%A1%A8%E5%8D%95%E6%8F%90%E4%BA%A4
+     */
+    api?: string | BaseApiObject;
+    /**
+     * Form 也可以配置 feedback。
+     */
+    feedback?: any;
+    /**
+     * 设置此属性后，表单提交发送保存接口后，还会继续轮询请求该接口，直到返回 finished 属性为 true 才 结束。
+     */
+    asyncApi?: string | BaseApiObject;
+    /**
+     * 轮询请求的时间间隔，默认为 3秒。设置 asyncApi 才有效
+     */
+    checkInterval?: number;
+    /**
+     * 如果决定结束的字段名不是 `finished` 请设置此属性，比如 `is_success`
+     */
+    finishedField?: string;
+    /**
+     * 提交完后重置表单
+     */
+    resetAfterSubmit?: boolean;
+    /**
+     * 提交后清空表单
+     */
+    clearAfterSubmit?: boolean;
+    /**
+     * 配置表单项默认的展示方式。
+     */
+    mode?: 'normal' | 'inline' | 'horizontal' | 'flex';
+    /**
+     * 表单项显示为几列
+     */
+    columnCount?: number;
+    /**
+     * 如果是水平排版，这个属性可以细化水平排版的左右宽度占比。
+     */
+    horizontal?: FormHorizontal;
+    /**
+     * 是否自动将第一个表单元素聚焦。
+     */
+    autoFocus?: boolean;
+    /**
+     * 消息文案配置，记住这个优先级是最低的，如果你的接口返回了 msg，接口返回的优先。
+     */
+    messages?: {
+        /**
+         * 表单验证失败时的提示
+         */
+        validateFailed?: string;
+    };
+    name?: string;
+    /**
+     * 配置容器 panel className
+     */
+    panelClassName?: ClassName;
+    /**
+     * 设置主键 id, 当设置后，检测表单是否完成时（asyncApi），只会携带此数据。
+     * @default id
+     */
+    primaryField?: string;
+    redirect?: string;
+    reload?: string;
+    /**
+     * 修改的时候是否直接提交表单。
+     */
+    submitOnChange?: boolean;
+    /**
+     * 表单初始先提交一次，联动的时候有用
+     */
+    submitOnInit?: boolean;
+    /**
+     * 默认的提交按钮名称，如果设置成空，则可以把默认按钮去掉。
+     */
+    submitText?: string;
+    /**
+     * 默认表单提交自己会通过发送 api 保存数据，但是也可以设定另外一个 form 的 name 值，或者另外一个 `CRUD` 模型的 name 值。 如果 target 目标是一个 `Form` ，则目标 `Form` 会重新触发 `initApi` 和 `schemaApi`，api 可以拿到当前 form 数据。如果目标是一个 `CRUD` 模型，则目标模型会重新触发搜索，参数为当前 Form 数据。
+     */
+    target?: string;
+    /**
+     * 是否用 panel 包裹起来
+     */
+    wrapWithPanel?: boolean;
+    /**
+     * 是否固定底下的按钮在底部。
+     */
+    affixFooter?: boolean;
+    /**
+     * 页面离开提示，为了防止页面不小心跳转而导致表单没有保存。
+     */
+    promptPageLeave?: boolean;
+    /**
+     * 具体的提示信息，选填。
+     */
+    promptPageLeaveMessage?: string;
+    /**
+     * 组合校验规则，选填
+     */
+    rules?: Array<{
+        rule: string;
+        message: string;
+        name?: string | Array<string>;
+    }>;
+    /**
+     * 禁用回车提交
+     */
+    preventEnterSubmit?: boolean;
+    /**
+     * 表单label的对齐方式
+     */
+    labelAlign?: LabelAlign;
+    /**
+     * label自定义宽度，默认单位为px
+     */
+    labelWidth?: number | string;
+    /**
+     * 展示态时的className
+     */
+    static?: boolean;
+    staticOn?: SchemaExpression;
+    staticClassName?: SchemaClassName;
+}
+export type FormGroup = FormSchemaBase & {
+    title?: string;
+    className?: string;
+};
+export type FormGroupNode = FormGroup | FormGroupArray;
+export interface FormGroupArray extends Array<FormGroupNode> {
+}
+export interface FormProps extends RendererProps, Omit<FormSchemaBase, 'mode' | 'className'> {
+    data: any;
+    store: IFormStore;
+    wrapperComponent: React.ElementType;
+    canAccessSuperData: boolean;
+    trimValues?: boolean;
+    lazyLoad?: boolean;
+    simpleMode?: boolean;
+    onInit?: (values: object, props: any) => any;
+    onReset?: (values: object, action?: any) => void;
+    onSubmit?: (values: object, action: any) => any;
+    onChange?: (values: object, diff: object, props: any) => any;
+    onFailed?: (reason: string, errors: any) => any;
+    onFinished: (values: object, action: ActionObject, store: IFormStore) => any;
+    onValidate: (values: object, form: any) => any;
+    onValidChange?: (valid: boolean, props: any) => void;
+    messages: {
+        fetchSuccess?: string;
+        fetchFailed?: string;
+        saveSuccess?: string;
+        saveFailed?: string;
+        validateFailed?: string;
+    };
+    rules: Array<{
+        rule: string;
+        message: string;
+        name?: string | Array<string>;
+    }>;
+    lazyChange?: boolean;
+    formLazyChange?: boolean;
+    loadingConfig?: {
+        root?: string;
+        show?: boolean;
+    };
+}
+export default class Form extends React.Component<FormProps, object> {
+    static defaultProps: {
+        title: string;
+        submitText: string;
+        initFetch: boolean;
+        wrapWithPanel: boolean;
+        mode: string;
+        collapsable: boolean;
+        controlWidth: string;
+        horizontal: {
+            left: number;
+            right: number;
+            offset: number;
+        };
+        columnCount: number;
+        panelClassName: string;
+        messages: {
+            fetchFailed: string;
+            saveSuccess: string;
+            saveFailed: string;
+        };
+        wrapperComponent: string;
+        finishedField: string;
+        initFinishedField: string;
+        labelAlign: string;
+    };
+    static propsList: Array<string>;
+    hooks: {
+        [propName: string]: Array<(...args: any) => Promise<any>>;
+    };
+    asyncCancel: () => void;
+    toDispose: Array<() => void>;
+    shouldLoadInitApi: boolean;
+    timer: ReturnType<typeof setTimeout>;
+    mounted: boolean;
+    lazyEmitChange: import("lodash").DebouncedFunc<any>;
+    unBlockRouting?: () => void;
+    constructor(props: FormProps);
+    componentDidMount(): void;
+    componentDidUpdate(prevProps: FormProps): void;
+    componentWillUnmount(): void;
+    /** 获取表单联合校验的规则 */
+    getNormalizedRules(): {
+        message: any;
+        rule: string;
+        name?: string | string[] | undefined;
+    }[];
+    dispatchInited(value: any): Promise<any>;
+    blockRouting(): any;
+    beforePageUnload(e: any): any;
+    onInit(): Promise<void>;
+    reload(subPath?: string, query?: any, ctx?: any, silent?: boolean): Promise<any>;
+    receive(values: object, name?: string, replace?: boolean): Promise<any>;
+    silentReload(target?: string, query?: any): Promise<any>;
+    initInterval(value: any): any;
+    isValidated(): boolean;
+    validate(forceValidate?: boolean, throwErrors?: boolean, toastErrors?: boolean, skipFlush?: boolean): Promise<boolean>;
+    setErrors(errors: {
+        [propName: string]: string;
+    }, tag?: string): void;
+    clearErrors(): void;
+    getValues(): any;
+    setValues(value: any, replace?: boolean): void;
+    submit(fn?: (values: object) => Promise<any>, throwErrors?: boolean, skipFlush?: boolean): Promise<any>;
+    flushing: boolean;
+    flush(): Promise<void>;
+    reset(): void;
+    addHook(fn: () => any, type?: 'validate' | 'init' | 'flush', enforce?: 'prev' | 'post'): () => void;
+    removeHook(fn: () => any, type?: string): void;
+    handleChange(value: any, name: string, submit: boolean, changePristine?: boolean, changeReason?: DataChangeReason): void;
+    formItemDispatchEvent(type: string, data: any): Promise<import("../utils").RendererEvent<any, any>>;
+    emittedData: any;
+    emitting: boolean;
+    emitChange(submit: boolean, emitedFromWatch?: boolean): Promise<void>;
+    handleBulkChange(values: Object, submit: boolean, changeReason?: DataChangeReason): void;
+    handleFormSubmit(e: React.UIEvent<any>): any;
+    handleReset(action: any): (data: any) => void;
+    handleAction(e: React.UIEvent<any> | void, action: ActionObject, data: object, throwErrors?: boolean, delegate?: IScopedContext): Promise<any>;
+    handleQuery(query: any): any;
+    handleDialogConfirm(values: object[], action: ActionObject, ctx: any, targets: Array<any>): void;
+    handleDialogClose(confirmed?: boolean): void;
+    handleDrawerConfirm(values: object[], action: ActionObject, ctx: any, targets: Array<any>): void;
+    handleDrawerClose(): void;
+    submitToTarget(target: string, values: object): void;
+    reloadTarget(target: string, data?: any): void;
+    closeTarget(target: string): void;
+    openFeedback(dialog: any, ctx: any): Promise<unknown>;
+    buildActions(): any[] | undefined;
+    renderFormItems(schema: Partial<FormSchemaBase> & {
+        controls?: Array<any>;
+    }, region?: string, otherProps?: Partial<FormProps>): React.ReactNode;
+    renderChildren(children: Array<any>, region: string, otherProps?: Partial<FormProps>): React.ReactNode;
+    renderChild(control: SchemaNode, key?: any, otherProps?: Partial<FormProps>, region?: string): React.ReactNode;
+    renderBody(): React.JSX.Element;
+    render(): JSX.Element;
+}
+export declare class FormRendererBase extends Form {
+    static contextType: React.Context<IScopedContext>;
+    constructor(props: FormProps, context: IScopedContext);
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    focus(): void;
+    doAction(action: ActionObject, data?: object, throwErrors?: boolean): Promise<any>;
+    handleAction(e: React.UIEvent<any> | undefined, action: ActionObject, ctx: object, throwErrors?: boolean, delegate?: IScopedContext): Promise<any>;
+    handleDialogConfirm(values: object[], action: ActionObject, ctx: any, targets: Array<any>): void;
+    submitToTarget(target: string, values: object): void;
+    reloadTarget(target: string, data: any): void;
+    closeTarget(target: string): void;
+    reload(target?: string, query?: any, ctx?: any, silent?: boolean, replace?: boolean): Promise<any>;
+    receive(values: object, name?: string, replace?: boolean): Promise<any>;
+    setData(values: object, replace?: boolean): void;
+    getData(): any;
+}
+export declare class FormRenderer extends FormRendererBase {
+}

@@ -1,0 +1,34 @@
+import React from 'react';
+import type { RootProps } from './Root';
+import { IScopedContext } from './Scoped';
+import { IRootStore } from './store/root';
+import { ActionObject } from './types';
+export interface RootRendererProps extends RootProps {
+    location?: any;
+    data?: Record<string, any>;
+    context?: Record<string, any>;
+    render: (region: string, schema: any, props: any) => React.ReactNode;
+}
+export declare class RootRenderer extends React.Component<RootRendererProps> {
+    store: IRootStore;
+    static contextType: React.Context<IScopedContext>;
+    constructor(props: RootRendererProps);
+    componentDidMount(): void;
+    componentDidUpdate(prevProps: RootRendererProps): void;
+    componentDidCatch(error: any, errorInfo: any): void;
+    componentWillUnmount(): void;
+    handlePageVisibilityChange(): void;
+    handleAction(e: React.UIEvent<any> | void, action: ActionObject, ctx: object, throwErrors?: boolean, delegate?: IScopedContext): any;
+    handleDialogConfirm(values: object[], action: ActionObject, ...args: Array<any>): void;
+    handleDialogClose(confirmed?: boolean): void;
+    handleDrawerConfirm(values: object[], action: ActionObject, ...args: Array<any>): void;
+    handleDrawerClose(): void;
+    openFeedback(dialog: any, ctx: any): Promise<unknown>;
+    reloadTarget(scoped: IScopedContext, target: string, data?: any): void;
+    renderRuntimeError(): React.ReactNode;
+    renderSpinner(): React.ReactNode;
+    renderError(): React.ReactNode;
+    renderDialog(): React.ReactNode;
+    renderDrawer(): React.ReactNode;
+    render(): string | number | boolean | React.JSX.Element | Iterable<React.ReactNode> | null | undefined;
+}

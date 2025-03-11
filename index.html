@@ -10,7 +10,16 @@
       href="/node_modules/@fortawesome/fontawesome-free/css/v4-shims.css"
     />
     <title>Amis Playground</title>
-    <script>window.enableAMISDebug = true;</script>
+    <script>
+      window.enableAMISDebug = true;
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?62d2bd1e2b771a828d50e49dab7230e4";
+        var s = document.getElementsByTagName("script")[0]; 
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

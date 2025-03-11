@@ -1,10 +1,15 @@
 import { strFromU8, strToU8, unzlibSync, zlibSync } from 'fflate'
+import { isPlainObject } from 'lodash'
 
-import { IMPORT_MAP_FILE_NAME, reactTemplateFiles, initFiles } from './templateAmis/files'
+import { IMPORT_MAP_FILE_NAME, reactTemplateFiles } from './templateAmis/files'
 import { ICustomFiles, IImportMap, ITheme } from './types'
 
 import type { IFiles } from './types'
-import { isPlainObject } from 'lodash'
+
+export const filePreset = {
+  app: 'App.tsx',
+  amisJson: 'amisJson.ts',
+}
 
 export function debounce(fn: (...args: any[]) => void, n = 100) {
   let handle: any

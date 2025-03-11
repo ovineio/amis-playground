@@ -4,9 +4,8 @@
  * 最好还是能够，使用一些在线的方式解决（或者能够扩展为部分为any）
  */
 
-import amisDts from './amis.txt?raw'
-import amisCoreHelperDts from './amisCore-helper.txt?raw'
-import amisCoreDts from './amisCore.txt?raw'
+import { typeArray as AmisTypes } from './amis/types'
+import { typeArray as AmisCoreTypes } from './amis-core/types'
 import amisUiComponentsDts from './amisUi-components.txt?raw'
 import amisUiDts from './amisUi.txt?raw'
 
@@ -15,24 +14,13 @@ const affix = `/index.d.ts`
 
 const getPath = (str: string) => `${prefix}${str}${affix}`
 
-export const amisPkgDefineFiles = [
-  [amisDts, getPath('amis')],
-  [
-    `
-    ${amisCoreDts}
-    export * from 'utils/helper';
-    export const normalizeLink: any;
-    export const attachmentAdpator: any;
-    `,
-    getPath('amis-core'),
-  ],
-  [amisCoreHelperDts, getPath('amis-core/utils/helper')],
+export const amisPkgDefineFiles = AmisTypes.concat(AmisCoreTypes).concat([
   [amisUiDts, getPath('amis-ui')],
   [amisUiComponentsDts, getPath('amis-ui/components')],
-]
+])
 
 export const declareUsedPkgs = [
-  [` declare module 'sinon'`, getPath('sinon')],
+  [`declare module 'sinon'`, getPath('sinon')],
   [`declare module 'fakerest'`, getPath('fakerest')],
   [`declare module 'mockjs'`, getPath('mockjs')],
   [`declare module 'copy-to-clipboard'`, getPath('copy-to-clipboard')],

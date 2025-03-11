@@ -1,0 +1,54 @@
+import { Instance, SnapshotIn } from 'mobx-state-tree';
+import { IScopedContext } from '../Scoped';
+import { DataChangeReason } from '../types';
+export declare const iRendererStore: import("mobx-state-tree").IModelType<{
+    id: import("mobx-state-tree").ISimpleType<string>;
+    path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    storeType: import("mobx-state-tree").ISimpleType<string>;
+    disposed: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+    childrenIds: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<import("mobx-state-tree").ISimpleType<string>>, [undefined]>;
+} & {
+    hasRemoteData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").ISimpleType<boolean>, [undefined]>;
+    data: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    initedAt: import("mobx-state-tree").IType<number | undefined, number, number>;
+    updatedAt: import("mobx-state-tree").IType<number | undefined, number, number>;
+    pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    pristineRaw: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    upStreamData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    action: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    dialogOpen: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    dialogData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    drawerOpen: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    drawerData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+}, {
+    readonly parentStore: any;
+    readonly __: any;
+    readonly hasChildren: boolean;
+    readonly children: any[];
+} & {
+    onChildStoreDispose(child: any): void;
+    syncProps(props: any, prevProps: any, list?: string[]): void;
+    dispose: (callback?: (() => void) | undefined) => void;
+    addChildId: (id: string) => void;
+    removeChildId: (id: string) => void;
+} & {
+    getValueByName(name: string, canAccessSuper?: boolean): any;
+    getPristineValueByName(name: string): any;
+    readonly pristineDiff: any;
+} & {
+    setTopStore(value: any): void;
+    initData(data?: object, skipSetPristine?: boolean, changeReason?: DataChangeReason): void;
+    reset(): void;
+    updateData(data?: object, tag?: object, replace?: boolean, concatFields?: string | string[], changeReason?: DataChangeReason): void;
+    changeValue(name: string, value: any, changePristine?: boolean, force?: boolean, otherModifier?: ((data: Object) => void) | undefined, changeReason?: DataChangeReason): void;
+    setCurrentAction(action: any, resolveDefinitions?: ((schema: any) => any) | undefined): void;
+    openDialog(ctx: any, additonal?: object, callback?: ((confirmed: boolean, values: any) => void) | undefined, scoped?: IScopedContext): void;
+    closeDialog(confirmed?: any, data?: any): void;
+    openDrawer(ctx: any, additonal?: object, callback?: ((confirmed: boolean, ret: any) => void) | undefined, scoped?: IScopedContext): void;
+    closeDrawer(confirmed?: any, data?: any): void;
+    getDialogScoped(): IScopedContext | null;
+    getDrawerScoped(): IScopedContext | null;
+}, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>;
+export type IIRendererStore = Instance<typeof iRendererStore>;
+export type SIRendererStore = SnapshotIn<typeof iRendererStore>;

@@ -1,0 +1,93 @@
+import { PlainObject } from '../types';
+export declare const valueMap: PlainObject;
+export declare const inheritValueMap: PlainObject;
+interface extra {
+    important?: boolean;
+    parent?: string;
+    inner?: string;
+    pre?: string;
+    suf?: string;
+}
+/**
+ * 查找或创建style标签
+ * @param param
+ * @param param.classId 根据classId查找或创建style标签
+ * @param param.id 用于赋值给style的class
+ * @param param.doc 文档对象，默认为document
+ * @param param.before 插入到某个class为id的style标签之前
+ */
+export declare function findOrCreateStyle({ classId, doc, before, id }: {
+    classId: string;
+    doc?: Document;
+    before?: string;
+    id?: string;
+}): HTMLElement;
+export declare function insertStyle({ style, classId, id, doc, before }: {
+    style: string;
+    classId: string;
+    id?: string;
+    doc?: Document;
+    before?: string;
+}): void;
+export declare function addStyle(style: string, id: string): void;
+export declare function formatStyle(themeCss: any, classNames?: CustomStyleClassName[], id?: string, defaultData?: any, data?: any): {
+    value: string;
+    origin: {
+        className: string;
+        content: string;
+    }[];
+};
+export interface CustomStyleClassName {
+    key: string;
+    weights?: {
+        default?: extra;
+        hover?: extra;
+        active?: extra;
+        focused?: extra;
+        disabled?: extra;
+    };
+}
+export declare function insertCustomStyle(params: {
+    themeCss: any;
+    classNames: CustomStyleClassName[];
+    id: string;
+    defaultData?: any;
+    customStyleClassPrefix?: string;
+    doc?: Document;
+    [propName: string]: any;
+}): void;
+/**
+ * 根据路径获取默认值
+ */
+export declare function getValueByPath(path: string, data: any): any;
+/**
+ * 设置源码编辑自定义样式
+ */
+export declare function insertEditCustomStyle(params: {
+    customStyle: any;
+    id?: string;
+    doc?: Document;
+    customStyleClassPrefix?: string;
+    [propName: string]: any;
+}): void;
+export interface InsertCustomStyle {
+    themeCss: any;
+    classNames: CustomStyleClassName[];
+    id?: string;
+    defaultData?: any;
+    customStyleClassPrefix?: string;
+    doc?: Document;
+}
+/**
+ * 移除自定义样式
+ */
+export declare function removeCustomStyle(type: string, id: string, doc?: Document, data?: any): void;
+export declare function formatInputThemeCss(themeCss: any): any;
+export declare function setThemeClassName(params: {
+    name: string | string[];
+    id?: string;
+    themeCss: any;
+    extra?: string;
+    [propName: string]: any;
+}): string;
+export {};

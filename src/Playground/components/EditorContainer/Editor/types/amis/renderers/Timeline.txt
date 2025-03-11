@@ -1,0 +1,126 @@
+import React from 'react';
+import { RendererProps } from 'amis-core';
+import type { BaseSchema, SchemaApi, SchemaCollection, SchemaTokenizeableString } from '../Schema';
+import type { IconCheckedSchema } from 'amis-ui';
+import { CardSchema } from './Card';
+type DotSize = 'sm' | 'md' | 'lg' | 'xl';
+declare enum DirectionMode {
+    left = "left",
+    right = "right",
+    top = "top",
+    bottom = "bottom",
+    alternate = "alternate"
+}
+export interface TimelineItemSchema extends Omit<BaseSchema, 'type'> {
+    /**
+     * 时间点
+     */
+    time: string;
+    /**
+     * 时间节点标题
+     */
+    title?: SchemaCollection;
+    /**
+     * 详细内容
+     */
+    detail?: string;
+    /**
+     * detail折叠时文案
+     */
+    detailCollapsedText?: string;
+    /**
+     * detail展开时文案
+     */
+    detailExpandedText?: string;
+    /**
+     * 时间点圆圈颜色
+     */
+    color?: string;
+    /**
+     * 图标
+     */
+    icon?: string | IconCheckedSchema;
+    /**
+     * 图标的CSS类名
+     */
+    iconClassName?: string;
+    /**
+     * 节点时间的CSS类名（优先级高于统一配置的timeClassName）
+     */
+    timeClassName?: string;
+    /**
+     * 节点标题的CSS类名（优先级高于统一配置的titleClassName）
+     */
+    titleClassName?: string;
+    /**
+     * 节点详情的CSS类名（优先级高于统一配置的detailClassName）
+     */
+    detailClassName?: string;
+    dotSize?: DotSize;
+    lineColor?: string;
+    hideDot?: boolean;
+    /**
+     * 卡片展示配置，如果传入则以卡片形式展示，传入对象转为卡片展示，传入的time、title、detail及相关属性将被忽略，只有连线配置和节点圆圈配置生效
+     */
+    cardSchema?: CardSchema;
+}
+export interface TimelineSchema extends BaseSchema {
+    /**
+     * 指定为 Timeline 时间轴渲染器
+     */
+    type: 'timeline';
+    /**
+     * 节点数据
+     */
+    items?: Array<TimelineItemSchema>;
+    /**
+     * API 或 数据映射
+     */
+    source?: SchemaApi | SchemaTokenizeableString;
+    /**
+     * 文字相对于时间轴展示方向
+     */
+    mode?: DirectionMode;
+    /**
+     * 展示方向
+     */
+    direction?: 'horizontal' | 'vertical';
+    /**
+     * 节点倒序
+     */
+    reverse?: boolean;
+    /**
+     * 节点title自定一展示模板
+     */
+    itemTitleSchema?: SchemaCollection;
+    /**
+     * 图标的CSS类名
+     */
+    iconClassName?: string;
+    /**
+     * 节点时间的CSS类名
+     */
+    timeClassName?: string;
+    /**
+     * 节点标题的CSS类名
+     */
+    titleClassName?: string;
+    /**
+     * 节点详情的CSS类名
+     */
+    detailClassName?: string;
+}
+export interface TimelineProps extends RendererProps, Omit<TimelineSchema, 'className'> {
+}
+export declare function TimelineCmpt(props: TimelineProps): React.JSX.Element;
+export declare class TimelineRenderer extends React.Component<TimelineProps> {
+    remoteRef: {
+        loadConfig: (ctx?: any) => Promise<any> | void;
+        setConfig: (value: any) => void;
+        syncConfig: () => void;
+    } | undefined;
+    remoteConfigRef(ref: any): void;
+    componentDidUpdate(prevProps: any): void;
+    render(): React.JSX.Element;
+}
+export {};

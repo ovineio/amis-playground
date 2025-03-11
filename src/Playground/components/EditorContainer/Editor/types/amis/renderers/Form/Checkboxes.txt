@@ -1,0 +1,75 @@
+import React from 'react';
+import type { ActionObject, Api, OptionsControlProps, Option } from 'amis-core';
+import { FormOptionsSchema } from '../../Schema';
+import type { TestIdBuilder } from 'amis-core';
+/**
+ * 复选框
+ * 文档：https://aisuda.bce.baidu.com/amis/zh-CN/components/form/checkboxes
+ */
+export interface CheckboxesControlSchema extends FormOptionsSchema {
+    type: 'checkboxes';
+    /**
+     * 是否开启全选功能
+     */
+    checkAll?: boolean;
+    /**
+     * 是否默认全选
+     */
+    defaultCheckAll?: boolean;
+    /**
+     * 全选/不选文案
+     */
+    checkAllText?: string;
+    /**
+     * 每行显示多少个
+     */
+    columnsCount?: number | number[];
+    /**
+     * 自定义选项展示
+     */
+    menuTpl?: string;
+    testIdBuilder?: TestIdBuilder;
+}
+export interface CheckboxesProps extends OptionsControlProps, Omit<CheckboxesControlSchema, 'options' | 'type' | 'className' | 'descriptionClassName' | 'inputClassName'> {
+    placeholder?: any;
+    itemClassName?: string;
+    columnsCount?: number | number[];
+    labelClassName?: string;
+    onAdd?: () => void;
+    addApi?: Api;
+    creatable: boolean;
+    createBtnLabel: string;
+    editable?: boolean;
+    removable?: boolean;
+    optionType?: 'default' | 'button';
+    menuTpl?: string;
+}
+export default class CheckboxesControl extends React.Component<CheckboxesProps, any> {
+    static defaultProps: {
+        columnsCount: number;
+        multiple: boolean;
+        placeholder: string;
+        creatable: boolean;
+        inline: boolean;
+        createBtnLabel: string;
+        optionType: string;
+    };
+    checkboxRef: React.RefObject<HTMLDivElement>;
+    checkboxRefObserver: ResizeObserver;
+    childRefs: Array<any>;
+    doAction(action: ActionObject, data: object, throwErrors: boolean): void;
+    reload(subpath?: string, query?: any): void;
+    handleAddClick(): void;
+    handleEditClick(e: Event, item: any): void;
+    handleDeleteClick(e: Event, item: any): void;
+    componentDidMount(): void;
+    componentWillUnmount(): void;
+    updateBorderStyle(): void;
+    renderGroup(option: Option, index: number): React.JSX.Element | null;
+    addChildRefs(el: any): void;
+    renderItem(option: Option, index: number): React.JSX.Element | null;
+    columnsSplit(body: React.ReactNode[]): any[];
+    render(): React.JSX.Element;
+}
+export declare class CheckboxesControlRenderer extends CheckboxesControl {
+}

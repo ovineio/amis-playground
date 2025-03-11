@@ -41,4 +41,7 @@
     "src/**/*",
     "src/vite-env.d.ts"
   ],
+  "exclude": [
+    "src/Playground/components/EditorContainer/Editor/types/**/*"
+  ]
 }

@@ -1,0 +1,540 @@
+import { Instance, SnapshotIn, IAnyModelType } from 'mobx-state-tree';
+import { Api, fetchOptions } from '../types';
+import { IFormStore } from './form';
+export declare const Column: import("mobx-state-tree").IModelType<{
+    title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    name: import("mobx-state-tree").IType<string | undefined, string, string>;
+    toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    index: import("mobx-state-tree").IType<number | undefined, number, number>;
+    type: import("mobx-state-tree").IType<string | undefined, string, string>;
+    children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+}, {
+    toggleToggle(): void;
+    setToggled(value: boolean): void;
+}, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>;
+export type IColumn2 = Instance<typeof Column>;
+export type SColumn2 = SnapshotIn<typeof Column>;
+export declare const Row: import("mobx-state-tree").IModelType<{
+    storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+    id: import("mobx-state-tree").ISimpleType<string>;
+    parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+    name: import("mobx-state-tree").ISimpleType<string>;
+    pristine: import("mobx-state-tree").IType<any, any, any>;
+    data: import("mobx-state-tree").IType<any, any, any>;
+    index: import("mobx-state-tree").ISimpleType<number>;
+    newIndex: import("mobx-state-tree").ISimpleType<number>;
+    depth: import("mobx-state-tree").ISimpleType<number>;
+    children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    path: import("mobx-state-tree").IType<string | undefined, string, string>;
+}, {
+    readonly checked: boolean;
+    readonly modified: boolean;
+    readonly moved: boolean;
+    readonly locals: any;
+    getDataWithModifiedChilden(): any;
+} & {
+    replaceWith(data: any): void;
+    change(values: object, savePristine?: boolean): void;
+    reset(): void;
+}, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>;
+export type IRow2 = Instance<typeof Row>;
+export type SRow2 = SnapshotIn<typeof Row>;
+export declare const TableStore2: import("mobx-state-tree").IModelType<{
+    id: import("mobx-state-tree").ISimpleType<string>;
+    path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    storeType: import("mobx-state-tree").ISimpleType<string>;
+    disposed: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+    childrenIds: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<import("mobx-state-tree").ISimpleType<string>>, [undefined]>;
+} & {
+    hasRemoteData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").ISimpleType<boolean>, [undefined]>;
+    data: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    initedAt: import("mobx-state-tree").IType<number | undefined, number, number>;
+    updatedAt: import("mobx-state-tree").IType<number | undefined, number, number>;
+    pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    pristineRaw: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    upStreamData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    action: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    dialogOpen: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    dialogData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    drawerOpen: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    drawerData: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+} & {
+    msg: import("mobx-state-tree").IType<string | undefined, string, string>;
+    error: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    fetching: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    saving: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    busying: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    checking: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    initializing: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    schema: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    schemaKey: import("mobx-state-tree").IType<string | undefined, string, string>;
+} & {
+    columns: import("mobx-state-tree").IArrayType<import("mobx-state-tree").IModelType<{
+        title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        name: import("mobx-state-tree").IType<string | undefined, string, string>;
+        toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        index: import("mobx-state-tree").IType<number | undefined, number, number>;
+        type: import("mobx-state-tree").IType<string | undefined, string, string>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    }, {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>;
+    rows: import("mobx-state-tree").IArrayType<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>;
+    selectedRowKeys: import("mobx-state-tree").IArrayType<import("mobx-state-tree").IType<any, any, any>>;
+    selectedRows: import("mobx-state-tree").IArrayType<import("mobx-state-tree").IReferenceType<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>>;
+    expandedRowKeys: import("mobx-state-tree").IArrayType<import("mobx-state-tree").IType<any, any, any>>;
+    columnsTogglable: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").ITypeUnion<boolean | "auto", boolean | "auto", boolean | "auto">, [undefined]>;
+    orderBy: import("mobx-state-tree").IType<string | undefined, string, string>;
+    order: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").ITypeUnion<"desc" | "asc", "desc" | "asc", "desc" | "asc">, [undefined]>;
+    query: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+    pageNo: import("mobx-state-tree").IType<number | undefined, number, number>;
+    pageSize: import("mobx-state-tree").IType<number | undefined, number, number>;
+    dragging: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+    rowSelectionKeyField: import("mobx-state-tree").IType<string | undefined, string, string>;
+    formsRef: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<import("mobx-state-tree").IType<any, any, any>>, [undefined]>;
+    canAccessSuperData: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+}, {
+    readonly parentStore: any;
+    readonly __: any;
+    readonly hasChildren: boolean;
+    readonly children: any[];
+} & {
+    onChildStoreDispose(child: any): void;
+    syncProps(props: any, prevProps: any, list?: string[]): void;
+    dispose: (callback?: (() => void) | undefined) => void;
+    addChildId: (id: string) => void;
+    removeChildId: (id: string) => void;
+} & {
+    getValueByName(name: string, canAccessSuper?: boolean): any;
+    getPristineValueByName(name: string): any;
+    readonly pristineDiff: any;
+} & {
+    setTopStore(value: any): void;
+    initData(data?: object, skipSetPristine?: boolean, changeReason?: import("../types").DataChangeReason | undefined): void;
+    reset(): void;
+    updateData(data?: object, tag?: object | undefined, replace?: boolean | undefined, concatFields?: string | string[] | undefined, changeReason?: import("../types").DataChangeReason | undefined): void;
+    changeValue(name: string, value: any, changePristine?: boolean | undefined, force?: boolean | undefined, otherModifier?: ((data: Object) => void) | undefined, changeReason?: import("../types").DataChangeReason | undefined): void;
+    setCurrentAction(action: any, resolveDefinitions?: ((schema: any) => any) | undefined): void;
+    openDialog(ctx: any, additonal?: object | undefined, callback?: ((confirmed: boolean, values: any) => void) | undefined, scoped?: import("amis").IScopedContext | undefined): void;
+    closeDialog(confirmed?: any, data?: any): void;
+    openDrawer(ctx: any, additonal?: object | undefined, callback?: ((confirmed: boolean, ret: any) => void) | undefined, scoped?: import("amis").IScopedContext | undefined): void;
+    closeDrawer(confirmed?: any, data?: any): void;
+    getDialogScoped(): import("amis").IScopedContext | null;
+    getDrawerScoped(): import("amis").IScopedContext | null;
+} & {
+    readonly loading: boolean;
+} & {
+    markFetching: (fetching?: boolean) => void;
+    markSaving: (saving?: boolean) => void;
+    markBusying: (busying?: boolean) => void;
+    fetchInitData: (api: Api, data?: object | undefined, options?: fetchOptions | undefined) => Promise<any>;
+    fetchData: (api: Api, data?: object | undefined, options?: fetchOptions | undefined) => Promise<any>;
+    reInitData: (data: object | undefined, replace?: boolean, concatFields?: string | string[] | undefined) => void;
+    updateMessage: (msg?: string | undefined, error?: boolean) => void;
+    clearMessage: () => void;
+    setHasRemoteData: () => void;
+    saveRemote: (api: Api, data?: object | undefined, options?: fetchOptions | undefined) => Promise<any>;
+    fetchSchema: (api: Api, data?: object | undefined, options?: fetchOptions | undefined) => Promise<any>;
+    checkRemote: (api: Api, data?: object | undefined, options?: fetchOptions | undefined) => Promise<any>;
+} & {
+    readonly toggable: boolean;
+    readonly columnsData: import("mobx-state-tree").IMSTArray<import("mobx-state-tree").IModelType<{
+        title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        name: import("mobx-state-tree").IType<string | undefined, string, string>;
+        toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        index: import("mobx-state-tree").IType<number | undefined, number, number>;
+        type: import("mobx-state-tree").IType<string | undefined, string, string>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    }, {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IArrayType<import("mobx-state-tree").IModelType<{
+        title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        name: import("mobx-state-tree").IType<string | undefined, string, string>;
+        toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        index: import("mobx-state-tree").IType<number | undefined, number, number>;
+        type: import("mobx-state-tree").IType<string | undefined, string, string>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    }, {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>>;
+    readonly toggableColumns: ({
+        title: any;
+        label: any;
+        name: string;
+        toggled: boolean;
+        breakpoint: any;
+        pristine: any;
+        toggable: boolean;
+        index: number;
+        type: string;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        name: import("mobx-state-tree").IType<string | undefined, string, string>;
+        toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        index: import("mobx-state-tree").IType<number | undefined, number, number>;
+        type: import("mobx-state-tree").IType<string | undefined, string, string>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    }, {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>)[];
+    readonly filteredColumns: any[];
+    readonly activeToggaleColumns: ({
+        title: any;
+        label: any;
+        name: string;
+        toggled: boolean;
+        breakpoint: any;
+        pristine: any;
+        toggable: boolean;
+        index: number;
+        type: string;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        title: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        label: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        name: import("mobx-state-tree").IType<string | undefined, string, string>;
+        toggled: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        breakpoint: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        pristine: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IType<any, any, any>, [undefined]>;
+        toggable: import("mobx-state-tree").IType<boolean | undefined, boolean, boolean>;
+        index: import("mobx-state-tree").IType<number | undefined, number, number>;
+        type: import("mobx-state-tree").IType<string | undefined, string, string>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+    }, {
+        toggleToggle(): void;
+        setToggled(value: boolean): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>)[];
+    readonly dataSource: any[];
+    readonly currentSelectedRowKeys: any;
+    readonly currentExpandedKeys: any[];
+    readonly unSelectedRows: ({
+        storeType: string;
+        id: string;
+        parentId: string;
+        name: string;
+        pristine: any;
+        data: any;
+        index: number;
+        newIndex: number;
+        depth: number;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+        path: string;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>)[];
+    hasColumnHidden(): boolean;
+    getData: (superData: any) => any;
+    getRowById(id: string): import("mobx-state-tree").ModelCreationType<import("mobx-state-tree/dist/internal").ExtractCFromProps<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }>> | import("mobx-state-tree").ModelSnapshotType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }> | ({
+        storeType: string;
+        id: string;
+        parentId: string;
+        name: string;
+        pristine: any;
+        data: any;
+        index: number;
+        newIndex: number;
+        depth: number;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+        path: string;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>) | null;
+    isSelected: (row: IRow2) => boolean;
+    getRowByIndex: (rowIndex: number, levels?: Array<number>, rows?: Array<IRow2>) => IRow2;
+    readonly moved: number;
+    readonly movedRows: (import("mobx-state-tree").ModelCreationType<import("mobx-state-tree/dist/internal").ExtractCFromProps<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }>> | import("mobx-state-tree").ModelSnapshotType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }> | ({
+        storeType: string;
+        id: string;
+        parentId: string;
+        name: string;
+        pristine: any;
+        data: any;
+        index: number;
+        newIndex: number;
+        depth: number;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+        path: string;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>))[];
+    readonly keyField: string;
+    readonly modified: number;
+    readonly modifiedRows: ({
+        storeType: string;
+        id: string;
+        parentId: string;
+        name: string;
+        pristine: any;
+        data: any;
+        index: number;
+        newIndex: number;
+        depth: number;
+        children: import("mobx-state-tree").IMSTArray<IAnyModelType> & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>>;
+        path: string;
+    } & import("mobx-state-tree/dist/internal").NonEmptyObject & {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    } & import("mobx-state-tree").IStateTreeNode<import("mobx-state-tree").IModelType<{
+        storeType: import("mobx-state-tree").IType<string | undefined, string, string>;
+        id: import("mobx-state-tree").ISimpleType<string>;
+        parentId: import("mobx-state-tree").IType<string | undefined, string, string>;
+        name: import("mobx-state-tree").ISimpleType<string>;
+        pristine: import("mobx-state-tree").IType<any, any, any>;
+        data: import("mobx-state-tree").IType<any, any, any>;
+        index: import("mobx-state-tree").ISimpleType<number>;
+        newIndex: import("mobx-state-tree").ISimpleType<number>;
+        depth: import("mobx-state-tree").ISimpleType<number>;
+        children: import("mobx-state-tree").IOptionalIType<import("mobx-state-tree").IArrayType<IAnyModelType>, [undefined]>;
+        path: import("mobx-state-tree").IType<string | undefined, string, string>;
+    }, {
+        readonly checked: boolean;
+        readonly modified: boolean;
+        readonly moved: boolean;
+        readonly locals: any;
+        getDataWithModifiedChilden(): any;
+    } & {
+        replaceWith(data: any): void;
+        change(values: object, savePristine?: boolean): void;
+        reset(): void;
+    }, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>>)[];
+} & {
+    update: (config: Partial<STableStore2>, options?: {
+        resolveDefinitions?: ((ref: string) => any) | undefined;
+    } | undefined) => void;
+    persistSaveToggledColumns: () => void;
+    setOrderByInfo: (key: string, direction: 'asc' | 'desc') => void;
+    updateQuery: (values: object, updater?: Function, pageNoField?: string, pageSizeField?: string, replace?: boolean) => void;
+    initRows: (rows: Array<any>, getEntryId?: ((entry: any, index: number) => string) | undefined, reUseRow?: boolean, keyField?: string) => void;
+    updateSelected: (selectedKeys: Array<any>) => void;
+    updateSelectedAll: () => void;
+    updateExpanded: (expandedRowKeys: Array<any>, keyField: string) => void;
+    exchange: (fromIndex: number, toIndex: number, item?: IRow2) => void;
+    reset: () => void;
+    toggleAllColumns: () => void;
+    afterCreate(): void;
+    saveRemote: (api: Api, data?: object, options?: fetchOptions) => Promise<any>;
+    addForm: (form: IFormStore, rowIndex: number) => void;
+}, import("mobx-state-tree")._NotCustomized, import("mobx-state-tree")._NotCustomized>;
+export type ITableStore2 = Instance<typeof TableStore2>;
+export type STableStore2 = SnapshotIn<typeof TableStore2>;

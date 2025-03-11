@@ -1,63 +1,102 @@
 // @ts-ignore
 import { Allotment } from 'allotment'
 import classnames from 'classnames'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import styles from './index.module.less'
 
+import { setAppSetting } from '@/localServer/settingService'
+import { useDebounceFn } from '@/Playground/hooks'
 import type { ISplitPane } from '@/Playground/types'
 
 import 'allotment/dist/style.css'
 
 export const SplitPane: React.FC<ISplitPane> = (props) => {
-  const { defaultSizes = [100, 100] } = props
+  const { defaultSizes } = props
 
   const SplitLinePosition = {
     LEFT: [0, Infinity],
-    CENTER: defaultSizes,
+    CENTER: [100, 100],
     RIGHT: [Infinity, 0],
   }
 
+  const [reloadId, setReloadId] = useState(0)
   const ref = useRef<any>(null)
-  const [SplitLine, setSplitLine] = useState(SplitLinePosition.CENTER)
+  const storeRef = useRef({
+    size: [],
+  })
 
-  const hiddenLeft = JSON.stringify(SplitLine) === JSON.stringify(SplitLinePosition.LEFT)
-  const hiddenRight = JSON.stringify(SplitLine) === JSON.stringify(SplitLinePosition.RIGHT)
-
-  const resize = () => {
-    if (JSON.stringify(SplitLine) !== JSON.stringify(SplitLinePosition.CENTER)) {
-      ref.current?.resize(SplitLinePosition.CENTER)
-      setSplitLine(SplitLinePosition.CENTER)
-      return true
+  useEffect(() => {
+    if (defaultSizes?.length) {
+      ref.current?.resize(defaultSizes)
     }
-    return false
+  }, [defaultSizes])
+
+  const hiddenLeft = storeRef.current.size[0] === 0
+  const hiddenRight = storeRef.current.size[1] === 0
+  const visibleLeft = storeRef.current.size[1] === 0
+  const visibleRight = storeRef.current.size[0] === 0
+
+  const setSize = (size: number[]) => {
+    storeRef.current.size = size
+    ref.current?.resize(size)
+    setReloadId(reloadId + 1)
   }
 
   const handleCollapseLeft = () => {
-    if (!resize()) {
-      ref.current?.resize(SplitLinePosition.LEFT)
-      setSplitLine(SplitLinePosition.LEFT)
+    const [_left, right] = storeRef.current.size
+    if (right === 0) {
+      setSize(SplitLinePosition.CENTER)
+    } else {
+      setSize(SplitLinePosition.LEFT)
     }
   }
 
   const handleCollapseRight = () => {
-    if (!resize()) {
-      ref.current?.resize(SplitLinePosition.RIGHT)
-      setSplitLine(SplitLinePosition.RIGHT)
+    const [left, _right] = storeRef.current.size
+    if (left === 0) {
+      setSize(SplitLinePosition.CENTER)
+    } else {
+      setSize(SplitLinePosition.RIGHT)
     }
   }
 
+  const { run: handleChange } = useDebounceFn(
+    (size: number[]) => {
+      storeRef.current.size = size
+      setAppSetting({
+        splitPaneSize: size,
+      })
+      if (size.includes(0)) {
+        setReloadId(reloadId + 1)
+      }
+    },
+    {
+      wait: 500,
+    }
+  )
+
   return (
-    <Allotment ref={ref} defaultSizes={defaultSizes}>
+    <Allotment ref={ref} defaultSizes={[100, 100]} onChange={handleChange}>
       <Allotment.Pane snap minSize={0}>
         {props.children?.[0]}
-        <div className={classnames(styles['collapse-left'], hiddenRight ? styles.active : '')}>
+        <div
+          className={classnames(styles['collapse-left'], {
+            [styles.active]: hiddenRight,
+            [styles.visible]: visibleLeft,
+          })}
+        >
           <div className={styles['collapse-btn']} onClick={handleCollapseLeft}></div>
         </div>
       </Allotment.Pane>
 
       <Allotment.Pane snap minSize={0}>
-        <div className={classnames(styles['collapse-right'], hiddenLeft ? styles.active : '')}>
+        <div
+          className={classnames(styles['collapse-right'], {
+            [styles.active]: hiddenLeft,
+            [styles.visible]: visibleRight,
+          })}
+        >
           <div className={styles['collapse-btn']} onClick={handleCollapseRight}></div>
         </div>
         {props.children?.[1]}

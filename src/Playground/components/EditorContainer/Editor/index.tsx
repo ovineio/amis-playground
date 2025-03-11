@@ -37,6 +37,7 @@ const EditorInner: React.FC<Props> = (props: Props) => {
     typeHelper: null as any,
     autoRun: false,
     codeRunId: 0,
+    filesNameStr: '',
   })
   const jsxSyntaxHighlightRef = useRef<any>({ highlighter: null, dispose: null })
 
@@ -60,15 +61,7 @@ const EditorInner: React.FC<Props> = (props: Props) => {
     })
 
     // 初始化自定义文件model
-    Object.entries(files).forEach(([fileName]) => {
-      if (!monaco?.editor?.getModel(monaco.Uri.parse(`file:///${fileName}`))) {
-        monaco?.editor?.createModel(
-          files[fileName].value,
-          fileName2Language(fileName),
-          monaco.Uri.parse(`file:///${fileName}`)
-        )
-      }
-    })
+    setFilesModel(files)
 
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       jsx: monaco.languages.typescript.JsxEmit.Preserve,
@@ -93,6 +86,29 @@ const EditorInner: React.FC<Props> = (props: Props) => {
     editorRef.current.typeHelper = await autoLoadExtraLib(editor, monaco, fileValue, onWatch)
     loadTsExtraLib(editor, monaco, fileValue, onWatch)
   }
+
+  const setFilesModel = (files: any) => {
+    const { monaco } = editorRef.current
+    Object.entries(files).forEach(([fileName]) => {
+      if (!monaco?.editor?.getModel(monaco.Uri.parse(`file:///${fileName}`))) {
+        monaco?.editor?.createModel(
+          files[fileName].value,
+          fileName2Language(fileName),
+          monaco.Uri.parse(`file:///${fileName}`)
+        )
+      }
+    })
+  }
+
+  // 当 filesName 发生变化
+  const filesNameStr = Object.keys(files).join(',')
+  useEffect(() => {
+    if (filesNameStr !== editorRef.current.filesNameStr) {
+      editorRef.current.filesNameStr = filesNameStr
+      // 进行设置 model（优化切换示例时，TS可能找不到文件）
+      setFilesModel(files)
+    }
+  }, [filesNameStr])
 
   useEffect(() => {
     const { editor, monaco, typeHelper } = editorRef.current

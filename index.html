@@ -42,13 +42,17 @@
       var _hmt = _hmt || [];
       (function() {
         var hm = document.createElement("script");
-        hm.src = "https://hm.baidu.com/hm.js?62d2bd1e2b771a828d50e49dab7230e4";
+        var statId = '62d2bd1e2b771a828d50e49dab7230e4';
+        if (location.href.indexOf('amis-playground.pages.dev') > -1) {
+          statId = '2c006d8283f4434ca655787cd34c74b9';
+        }
+        hm.src = "https://hm.baidu.com/hm.js?" + statId;
         var s = document.getElementsByTagName("script")[0]; 
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script type="module" crossorigin src="./assets/index-ecf51b68.js"></script>
-    <link rel="stylesheet" href="./assets/index-aa35f1d5.css">
+    <script type="module" crossorigin src="./assets/index-e711d816.js"></script>
+    <link rel="stylesheet" href="./assets/index-2d7999fc.css">
   </head>
   <body>
     <div id="root"></div>

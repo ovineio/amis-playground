@@ -1,7 +1,8 @@
+
 .collapse() {
   position: absolute;
   top: 0;
-  z-index: 1;
+  z-index: 4;
   display: flex;
   width: 20px;
   height: 100%;
@@ -11,10 +12,10 @@
 .collapse-btn() {
   position: relative;
   display: none;
-  width: 10px;
+  width: 15px;
   height: 48px;
   cursor: pointer;
-  background-color: #e7e9e8;
+  background-color: var(--primary);
 }
 
 .collapse-btn-arrow() {
@@ -28,6 +29,7 @@
   border-bottom: 5px solid transparent;
   transform: translateX(-50%) translateY(-50%);
 }
+
 
 .collapse-left {
   .collapse();
@@ -46,7 +48,7 @@
 
     &::after {
       .collapse-btn-arrow();
-      border-right: 6px solid #000;
+      border-right: 6px solid #fff;
     }
   }
 }
@@ -68,7 +70,7 @@
 
     &::after {
       .collapse-btn-arrow();
-      border-left: 6px solid #000;
+      border-left: 6px solid #fff;
     }
   }
 }
@@ -88,6 +90,12 @@
       .collapse-btn {
         opacity: 1;
       }
+    }
+  }
+
+  &.visible {
+    .collapse-btn {
+      opacity: 1;
     }
   }
 }

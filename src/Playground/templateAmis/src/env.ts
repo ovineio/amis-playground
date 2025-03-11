@@ -1,5 +1,5 @@
 /**
- * Amis env 配置
+ * Amis env 配置 (与amis 文档一致的 env 实现)
  * 文档：https://aisuda.bce.baidu.com/amis/zh-CN/docs/start/getting-started#env
  */
 
@@ -52,6 +52,7 @@ const env = {
     let { url, method, data, responseType, config, headers } = api;
     config = config || {};
 
+    // 将 /amis 开头链接，使用 amis文档 api
     if (typeof url === "string" && url.startsWith("/amis/")) {
       url = url.replace(/^\/amis\//, "https://aisuda.bce.baidu.com/amis/");
     }

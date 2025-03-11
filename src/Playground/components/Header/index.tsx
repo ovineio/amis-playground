@@ -118,7 +118,7 @@ export const Header: React.FC = () => {
           />
         </TooltipWrapper>
 
-        <TooltipWrapper placement='bottom' tooltip='Github源码'>
+        <TooltipWrapper placement='bottom' tooltip='Star Me'>
           <a href='https://github.com/ovineio/amis-playground' target='_blank'>
             <img src='https://img.shields.io/github/stars/ovineio/amis-playground.svg' />
           </a>

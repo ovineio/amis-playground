@@ -13,6 +13,7 @@ export type AppSetting = {
   activeFileTab: string
   theme: string
   autoRun: boolean
+  splitPaneSize: number[]
   shareConfig: {
     useShortUrl: string
     expiryDays: number

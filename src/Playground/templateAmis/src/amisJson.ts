@@ -4,7 +4,9 @@
  * 
  */
 
-const amisJson = {
+import { SchemaObject } from 'amis'
+
+const amisJson: SchemaObject = {
   type: 'page',
   body: [{
     type: 'form',

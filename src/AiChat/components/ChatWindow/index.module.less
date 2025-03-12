@@ -1,0 +1,26 @@
+.chatContainer {
+  &[data-hidden="1"] {
+    //
+  }
+  
+  :global {
+    &.hiddenWindow {
+      //
+    }
+    .ChatWrapper {
+      width: 40vw;
+      height: 70vh;
+    }
+    .ChatWrapper-body {
+      flex-direction: row-reverse;
+    }
+    .Sidebar {
+      width: 200px;
+      border-right: 1px solid #e3e3e3;
+      background: #eeeeee;
+    }
+    .ChatFooter .Composer-input {
+      min-height: 64px;
+    }
+  }
+}

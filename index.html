@@ -9,6 +9,7 @@
       rel="stylesheet"
       href="/node_modules/@fortawesome/fontawesome-free/css/v4-shims.css"
     />
+    <link rel="stylesheet" href="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.css" />
     <title>Amis Playground</title>
     <script>
       window.enableAMISDebug = true;
@@ -27,6 +28,11 @@
   </head>
   <body>
     <div id="root"></div>
+    <div id="aiChatRoot"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!--TODO: 将 react 从 chatSdk 剥离出来 使用 pure.js （） -->
+    <script src="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.js"></script>
+    <script src="https://g.alicdn.com/chatui/icons/2.0.2/index.js"></script>
+    <script type="module" src="/src/aiChat/index.tsx"></script>
   </body>
 </html>

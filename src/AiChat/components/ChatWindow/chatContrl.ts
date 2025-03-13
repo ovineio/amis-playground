@@ -20,6 +20,10 @@ export const getChatBot = () => {
   return chatBot
 }
 
+export const isChatSdkLoad = () => {
+  return !!ChatSDK
+}
+
 const setInputDisabled = (toggle: boolean) => {
   chatBot.bot.setConfig({
     inputOptions: {

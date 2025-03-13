@@ -1,3 +1,5 @@
+// TODO:  整理所有 ICON 封装成组件
+import CloseIcon from './Close.svg?raw'
 import SizeIcon from './Size.svg?raw'
 
 import styles from './index.module.less'
@@ -56,15 +58,30 @@ export const Header = () => {
     }
   }, [])
 
+  const handleClose = () => {
+    window.postMessage({
+      action: 'closeChatWindow',
+    })
+  }
+
   return (
     <div className={styles.wrapper}>
       <i></i>
       <span>Amis Bot</span>
-      <button
-        title='调整大小'
-        ref={(ref) => (storeRef.current.resizeTrigger = ref)}
-        dangerouslySetInnerHTML={{ __html: SizeIcon }}
-      />
+      <div className={styles.right}>
+        <button
+          title='调整大小'
+          className={styles.resize}
+          ref={(ref) => (storeRef.current.resizeTrigger = ref)}
+          dangerouslySetInnerHTML={{ __html: SizeIcon }}
+        />
+        <button
+          title='关闭'
+          className={styles.close}
+          onClick={handleClose}
+          dangerouslySetInnerHTML={{ __html: CloseIcon }}
+        />
+      </div>
     </div>
   )
 }

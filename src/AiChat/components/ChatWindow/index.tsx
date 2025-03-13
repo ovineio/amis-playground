@@ -7,6 +7,7 @@ import {
   clearCurrConversion,
   abortCurrReplying,
   askToHumanPrompt,
+  isChatSdkLoad,
 } from './chatContrl'
 import { Header } from './Header'
 import defBot from '../../assets/def-bot.jpeg'
@@ -14,11 +15,11 @@ import defUser from '../../assets/def-user.png'
 
 import styles from './index.module.less'
 
-export { getChatBot }
+export { getChatBot, isChatSdkLoad }
 
 export const initChatBot = (opts: { root: any }) => {
   // 未加载成功 SDK 不处理
-  if (!ChatSDK) {
+  if (!isChatSdkLoad()) {
     return
   }
 

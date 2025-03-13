@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 
-import { initChatBot, getChatBot } from './components/ChatWindow'
+import { initChatBot, getChatBot, isChatSdkLoad } from './components/ChatWindow'
 import { FloatAiIcon } from './components/FloatAiIcon'
 
 const AppEntry = () => {
@@ -18,10 +18,48 @@ const AppEntry = () => {
     setShowWindow(!showWindow)
   }
 
+  const handleDefOpenChat = () => {
+    let timer: any = 0
+    let reTryCount = 0
+    const doDefOpenChat = () => {
+      if (reTryCount > 3) {
+        clearTimeout(timer)
+        return
+      }
+
+      if (isChatSdkLoad() && !getChatBot()) {
+        clearTimeout(timer)
+        reTryCount = 0
+        setShowWindow(true)
+        return
+      }
+
+      reTryCount += 1
+      clearTimeout(timer)
+      timer = setTimeout(doDefOpenChat, 1500)
+    }
+
+    doDefOpenChat()
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }
+
   useEffect(() => {
-    setTimeout(() => {
-      setShowWindow(true)
-    }, 2000)
+    // TODO: 梳理项目 postMsg 通信，封装公共方法
+    window.addEventListener('message', ({ data }) => {
+      const { action } = data
+      if (action === 'closeChatWindow') {
+        setShowWindow(false)
+      }
+    })
+
+    const unMount = handleDefOpenChat()
+
+    return () => {
+      unMount()
+    }
   }, [])
 
   useEffect(() => {
@@ -42,3 +80,5 @@ const AppEntry = () => {
 }
 
 ReactDOM.createRoot(document.getElementById('aiChatRoot')!).render(<AppEntry />)
+
+

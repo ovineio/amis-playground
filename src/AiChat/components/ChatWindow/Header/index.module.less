@@ -1,26 +1,39 @@
 .wrapper {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-    padding: 0 8px;
-    border-bottom: 1px solid #e3e3e3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+  padding: 0 8px;
+  border-bottom: 1px solid #e3e3e3;
 
-    button {
-        border: none;
-        padding: 4px;
-        border-radius: 4px;
-        font-size: 14px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: nesw-resize;
-        &:hover {
-            background: #e0e0e0;
-        }
+  button {
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      background: #e0e0e0;
     }
-    svg {
-        width: 18px;
-        height: 18px;
-    }
+  }
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .right {
+    display: flex;
+    gap: 0 6px;
+  }
+
+  .close {
+    cursor: pointer;
+  }
+
+  .resize {
+    cursor: nesw-resize;
+  }
 }

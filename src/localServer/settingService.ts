@@ -18,6 +18,10 @@ export type AppSetting = {
     useShortUrl: string
     expiryDays: number
   }
+  aiChat: {
+    showWindow: boolean
+    chatWindowSize: number[]
+  }
 }
 
 export const getAppSetting = async (): Promise<Partial<AppSetting>> => {

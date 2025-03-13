@@ -1,0 +1,40 @@
+.chatContainer {
+  :global {
+    a {
+      &.ListItem {
+        font-size: 14px;
+        &:hover {
+          font-size: 14px;
+        }
+      }
+    }
+    .Recommend .title {
+      line-height: 24px;
+      margin-top: 6px;
+    }
+    .ChatWrapper {
+      width: 40vw;
+      height: 70vh;
+    }
+    .ChatWrapper-body {
+      flex-direction: row-reverse;
+    }
+    .Sidebar {
+      width: 200px;
+      border-right: 1px solid #e3e3e3;
+      background: #eeeeee;
+    }
+    .ChatFooter {
+      .Composer-input {
+        min-height: 64px;
+      }
+      .QuickReply[disabled] {
+        cursor: not-allowed;
+        pointer-events: none;
+        background: var(--chat-gray-4);
+        border-color: transparent;
+        color: var(--chat-gray-2);
+      }
+    }
+  }
+}

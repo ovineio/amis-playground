@@ -1,0 +1,92 @@
+import {
+  getDefaultMsgs,
+  getHistoryMsgs,
+  sendMsg,
+  setChatBot,
+  getChatBot,
+  clearCurrConversion,
+  abortCurrReplying,
+  askToHumanPrompt,
+} from './chatContrl'
+import { Header } from './Header'
+import defBot from '../../assets/def-bot.jpeg'
+import defUser from '../../assets/def-user.png'
+
+import styles from './index.module.less'
+
+export { getChatBot }
+
+export const initChatBot = (opts: { root: any }) => {
+  // 未加载成功 SDK 不处理
+  if (!ChatSDK) {
+    return
+  }
+
+  const { root } = opts
+
+  root.classList.add(styles.chatContainer)
+
+  const chatBot = new ChatSDK({
+    root,
+    config: {
+      autoLoadMore: true,
+      robot: {
+        avatar: defBot,
+      },
+      user: {
+        avatar: defUser,
+      },
+      messages: getDefaultMsgs(),
+      quickReplies: [
+        {
+          name: '清空会话',
+          icon: 'refresh',
+          onClick: clearCurrConversion,
+        },
+        {
+          name: '中断回复',
+          icon: 'close',
+          onClick: abortCurrReplying,
+        },
+        {
+          name: '人工提问',
+          icon: 'servicer',
+          onClick: askToHumanPrompt,
+        },
+      ],
+      renderNavbar() {
+        return <Header />
+      },
+      // sidebar: [
+      //   {
+      //     code: 'ConversionPanel',
+      //   },
+      // ],
+    },
+    handlers: {
+      // beforeSendMessage() {
+      //   if (getChatBot().isReplying) {
+      //     return false // false时消息将不放到消息列表中
+      //   }
+      // },
+      // 对 消息内容进行处理
+      // renderMessageContent() {
+      //   //
+      // }
+    },
+    requests: {
+      history: getHistoryMsgs,
+      send: sendMsg,
+    },
+    components: {
+      // ConversionPanel: () => {
+      //   return <div>123</div>
+      // },
+    },
+  })
+
+  setChatBot(chatBot)
+  window.chatBot = chatBot
+
+  chatBot.run()
+}

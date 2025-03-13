@@ -1,3 +1,10 @@
+:root {
+  --zIndex-aiChat: 100;
+  --chat-brand-1: #2468f2;
+  --chat-brand-2: #427cf0;
+  --chat-brand-3: #c7d9ff;
+}
+
 * {
   padding: 0;
   margin: 0;

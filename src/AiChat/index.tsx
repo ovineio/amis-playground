@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from 'react'
 import ReactDOM from 'react-dom'
 
-import { initChatBot, getChatBoot } from './components/ChatWindow'
+import { initChatBot, getChatBot } from './components/ChatWindow'
 import { FloatAiIcon } from './components/FloatAiIcon'
 
 const AppEntry = () => {
@@ -25,7 +25,7 @@ const AppEntry = () => {
   }, [])
 
   useEffect(() => {
-    if (showWindow && !getChatBoot()) {
+    if (showWindow && !getChatBot()) {
       initChatBot({
         root: chatWindowRef.current,
       })

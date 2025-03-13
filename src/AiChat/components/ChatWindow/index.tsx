@@ -1,12 +1,12 @@
-import { toast } from 'amis-ui'
-
 import {
   getDefaultMsgs,
   getHistoryMsgs,
-  isInputDisabled,
   sendMsg,
-  setChatBoot,
-  getChatBoot,
+  setChatBot,
+  getChatBot,
+  clearCurrConversion,
+  abortCurrReplying,
+  askToHumanPrompt,
 } from './chatContrl'
 import { Header } from './Header'
 import defBot from '../../assets/def-bot.jpeg'
@@ -14,11 +14,14 @@ import defUser from '../../assets/def-user.png'
 
 import styles from './index.module.less'
 
-import { defaultCvs, setCvsMsgList } from '@/localServer/aiServervice'
-
-export { getChatBoot }
+export { getChatBot }
 
 export const initChatBot = (opts: { root: any }) => {
+  // 未加载成功 SDK 不处理
+  if (!ChatSDK) {
+    return
+  }
+
   const { root } = opts
 
   root.classList.add(styles.chatContainer)
@@ -38,23 +41,17 @@ export const initChatBot = (opts: { root: any }) => {
         {
           name: '清空会话',
           icon: 'refresh',
-          onClick: async () => {
-            if (isInputDisabled()) {
-              toast.warning('正在回复中，无法清空会话')
-              return
-            }
-            chatBot.bot.resetMessageList(
-              [
-                {
-                  code: 'system',
-                  data: {
-                    text: '已清空会话',
-                  },
-                },
-              ].concat(getDefaultMsgs())
-            )
-            await setCvsMsgList(defaultCvs.id, [])
-          },
+          onClick: clearCurrConversion,
+        },
+        {
+          name: '中断回复',
+          icon: 'close',
+          onClick: abortCurrReplying,
+        },
+        {
+          name: '人工提问',
+          icon: 'servicer',
+          onClick: askToHumanPrompt,
         },
       ],
       renderNavbar() {
@@ -67,11 +64,11 @@ export const initChatBot = (opts: { root: any }) => {
       // ],
     },
     handlers: {
-      beforeSendMessage() {
-        if (isInputDisabled()) {
-          return false // false时消息将不放到消息列表中
-        }
-      },
+      // beforeSendMessage() {
+      //   if (getChatBot().isReplying) {
+      //     return false // false时消息将不放到消息列表中
+      //   }
+      // },
       // 对 消息内容进行处理
       // renderMessageContent() {
       //   //
@@ -88,7 +85,7 @@ export const initChatBot = (opts: { root: any }) => {
     },
   })
 
-  setChatBoot(chatBot)
+  setChatBot(chatBot)
   window.chatBot = chatBot
 
   chatBot.run()

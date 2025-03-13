@@ -1,21 +1,43 @@
+import { toast } from 'amis'
 import { uuidv4 } from 'amis-core'
-import { random } from 'lodash'
+import { random, set } from 'lodash'
 
 import {
   appendCvsMsgItem,
   defaultCvs,
   getCvsMsgList,
   sendMsgSync,
+  setCvsMsgList,
 } from '@/localServer/aiServervice'
 
 let chatBot: any = null
 
-export const setChatBoot = (bot) => {
+export const setChatBot = (bot) => {
   chatBot = bot
 }
 
-export const getChatBoot = () => {
+export const getChatBot = () => {
   return chatBot
+}
+
+const setInputDisabled = (toggle: boolean) => {
+  chatBot.bot.setConfig({
+    inputOptions: {
+      disabled: toggle,
+    },
+  })
+}
+
+const setIsReplying = (toggle: boolean) => {
+  chatBot.isReplying = toggle
+  setInputDisabled(toggle)
+  const quickBtns = document.querySelectorAll('#aiChatRoot .ChatFooter .ScrollView-item')
+  const clearBtn = quickBtns[0]?.querySelector('button')
+  const abortBtn = quickBtns[1]?.querySelector('button')
+  if (clearBtn && abortBtn) {
+    clearBtn.disabled = toggle
+    abortBtn.disabled = !toggle
+  }
 }
 
 const helloMsgPool = [
@@ -59,11 +81,8 @@ export const getDefaultMsgs = () => {
   ]
 }
 
-export const isInputDisabled = () => {
-  return !!chatBot.bot.appOptions?.config?.inputOptions?.disabled
-}
-
 export const getHistoryMsgs = async () => {
+  setIsReplying(false)
   let msgList = await getCvsMsgList(defaultCvs.id)
   let historyMsgs = []
   if (msgList.length) {
@@ -95,59 +114,161 @@ export const sendMsg = (msg: any) => {
     id: 'typing',
     code: 'typing',
   })
-  chatBot.bot.setConfig({
-    inputOptions: {
-      disabled: true,
-    },
-  })
+  chatBot.sendMsgAbortCtrl = new AbortController()
+  setIsReplying(true)
+
+  const handleChunk = ({ formattedMsg }) => {
+    if (withTyping) {
+      withTyping = false
+      chatBot.bot.deleteMessage('typing')
+    }
+    chatBot.bot.updateOrAppendMessage(formattedMsg)
+  }
+
+  const handleError = ({ msg, chunks, errType, formattedMsg }) => {
+    setIsReplying(false)
+    if (errType === 'reqAbortErr') {
+      // 如果存在id，则按正常流程
+      if (formattedMsg?.id) {
+        handleDone({ formattedMsg })
+      }
+      return
+    }
+
+    chatBot.bot.deleteMessage('typing')
+    chatBot.bot.appendMessage({
+      code: 'markdown',
+      id: uuidv4(),
+      data: {
+        text:
+          '<span class="text-danger font-bold">抱歉，无法正常回复您的消息，原因：</span>' +
+          (chunks ? '\n```json \n' + JSON.stringify(chunks, ' ', 2) + '\n```' : msg),
+      },
+    })
+  }
+
+  const handleDone = ({ formattedMsg, msg: errMsg }) => {
+    setIsReplying(false)
+
+    // 数据流设置 结束状态
+    set(formattedMsg, 'data.streamEnd', true)
+
+    appendCvsMsgItem(
+      defaultCvs.id,
+      [
+        {
+          ...msg,
+          _role: 'user',
+          id: uuidv4(),
+        },
+        !errMsg && {
+          ...formattedMsg,
+          _role: 'assistant',
+        },
+      ].filter(Boolean)
+    )
+  }
+
   sendMsgSync({
     csvId: defaultCvs.id,
     withContext: true,
+    abortSignal: chatBot.sendMsgAbortCtrl.signal,
     messages: [
       {
         role: 'user',
         content: msg.data.text,
       },
     ],
-    onError: ({ msg, chunks }) => {
-      chatBot.bot.deleteMessage('typing')
-      chatBot.bot.appendMessage({
-        code: 'markdown',
-        id: uuidv4(),
+    onError: handleError,
+    onChunk: handleChunk,
+    onDone: handleDone,
+  })
+}
+
+export const clearCurrConversion = async () => {
+  if (chatBot.isReplying) {
+    toast.warning('正在回复中，无法清空会话')
+    return
+  }
+  chatBot.bot.resetMessageList(
+    [
+      {
+        code: 'system',
         data: {
-          text:
-            '<span class="text-danger font-bold">抱歉，无法正常回复您的消息，原因：</span>' +
-            (chunks ? '\n```json \n' + JSON.stringify(chunks, ' ', 2) + '\n```' : msg),
+          text: '已清空会话',
         },
-      })
-    },
-    onChunk({ formattedMsg }) {
-      if (withTyping) {
-        withTyping = false
-        chatBot.bot.deleteMessage('typing')
-      }
-      chatBot.bot.updateOrAppendMessage(formattedMsg)
-    },
-    onDone: ({ formattedMsg, msg: errMsg }) => {
-      chatBot.bot.setConfig({
-        inputOptions: {
-          disabled: false,
+      },
+    ].concat(getDefaultMsgs())
+  )
+  await setCvsMsgList(defaultCvs.id, [])
+  toast.success('已清空会话')
+}
+
+export const abortCurrReplying = () => {
+  if (!chatBot.isReplying) {
+    toast.warning('当前未在回复中，无法中断')
+    return
+  }
+
+  if (chatBot.sendMsgAbortCtrl) {
+    chatBot.sendMsgAbortCtrl.abort()
+    chatBot.sendMsgAbortCtrl = null
+    chatBot.bot.appendMessage({
+      code: 'system',
+      id: uuidv4(),
+      data: {
+        text: '已中断本次回复',
+      },
+    })
+    toast.success('已中断本次回复')
+    return
+  }
+
+  toast.error('无法中断')
+}
+
+export const reAskQuestion = () => {
+  //
+}
+
+export const askToHumanPrompt = () => {
+  chatBot.bot.appendMessage({
+    code: 'recommend',
+    data: {
+      title:
+        'Hello~ 目前 Amis Bot 还在完善中，希望能它够帮助你解决 Amis 的使用问题，以及辅助生成 Json。如果你有任何 Amis 使用上的问题，都可以向 AmisPlayground 提问～',
+      recommends: [
+        {
+          title: '向 AmisPlayground 提问 （回复比 Amis官方 快～）',
+          url: 'https://github.com/ovineio/amis-playground/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen',
         },
-      })
-      appendCvsMsgItem(
-        defaultCvs.id,
-        [
-          {
-            ...msg,
-            _role: 'user',
-            id: uuidv4(),
+        {
+          title: '向 Amis官方 提问',
+          url: 'https://github.com/baidu/amis/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen',
+        },
+        {
+          title: 'AmisPlayground 项目在做什么？',
+          onClick: () => {
+            chatBot.bot.appendMessage({
+              type: 'markdown',
+              // Doing 时再公布。
+              // - [ ] 开发以Amis为基础库的一体化脚手架，提供快速上手开发功能。 (类似[UmiMax](https://umijs.org/docs/max/introduce))
+              // - [ ] 集成[AmisEditor](https://github.com/aisuda/amis-editor-demo)与OpenSourceServer实现在线生成简易应用。（类似简版[爱速搭](https://aisuda.cloud.baidu.com/)）
+              data: {
+                text: `
+如今 Amis 的使用者越来越多。AmisPlayground 正在围绕 Amis 打造一个方便好用的工具&平台，
+帮助开发者更好的使用 Amis， 将 Amis 提供的能力发挥到最大~
+
+**主要开发内容是：**
+- [x] 在线AmisDemo编辑器，提供代码片段分享功能。
+- [ ] 借助已有AI模型提供辅助生成Json功能。
+> 如果对本项目感兴趣，可以关注 [迭代计划](https://github.com/ovineio/amis-playground/issues/3)，同时欢迎参与进来~
+`,
+              },
+            })
           },
-          !errMsg && {
-            ...formattedMsg,
-            _role: 'assistant',
-          },
-        ].filter(Boolean)
-      )
+        },
+      ],
     },
   })
 }

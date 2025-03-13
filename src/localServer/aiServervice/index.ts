@@ -120,12 +120,13 @@ type AskOptions = {
   messages: any[]
   csvId?: string
   withContext?: boolean
+  abortSignal?: any
   onError?: (...args: any[]) => void
   onDone?: (...args: any[]) => void
   onChunk?: (...args: any[]) => void
 }
 export const sendMsgSync = async (options: AskOptions) => {
-  const { csvId, withContext, messages, onChunk, onDone, onError } = options
+  const { csvId, withContext, messages, abortSignal, onChunk, onDone, onError } = options
 
   const { messages: baseMsgs = [], ...restConfig } = bigModeConfig
 
@@ -140,6 +141,7 @@ export const sendMsgSync = async (options: AskOptions) => {
 
   const response = await fetch(bigModelApi.ask, {
     method: 'post',
+    signal: abortSignal,
     body: JSON.stringify({
       ...restConfig,
       messages: allMsgs,
@@ -164,7 +166,23 @@ export const sendMsgSync = async (options: AskOptions) => {
   let formattedMsg = {}
   // Todo: 防止死循环
   while (true) {
-    const { done, value } = await reader.read()
+    let done, value
+    try {
+      const info = await reader.read()
+      done = info.done
+      value = info.value
+    } catch (err: any) {
+      const isAbort = err.name === 'AbortError'
+      onError &&
+        onError({
+          msg: isAbort ? '主动中断请求' : '读取数据发生错误',
+          errType: isAbort ? 'reqAbortErr' : 'readDataErr',
+          err,
+          formattedMsg,
+        })
+      break
+    }
+
     if (done) {
       onDone &&
         onDone({
@@ -188,6 +206,7 @@ export const sendMsgSync = async (options: AskOptions) => {
         onError({
           msg: '无消息ID',
           chunks: chunkItems,
+          formattedMsg,
         })
       break
     } else {

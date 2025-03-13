@@ -36,6 +36,7 @@
     <link type="image/x-icon" rel="shortcut icon" href="./amis-logo.png">
     
     
+    <link rel="stylesheet" href="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.css" />
     <title>Amis Playground</title>
     <script>
       window.enableAMISDebug = true;
@@ -51,11 +52,15 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script type="module" crossorigin src="./assets/index-e711d816.js"></script>
-    <link rel="stylesheet" href="./assets/index-2d7999fc.css">
+    <script type="module" crossorigin src="./assets/index-d4321687.js"></script>
+    <link rel="stylesheet" href="./assets/index-99ba5c4d.css">
   </head>
   <body>
     <div id="root"></div>
+    <div id="aiChatRoot"></div>
     
+    <!--TODO: 将 react 从 chatSdk 剥离出来 使用 pure.js （） -->
+    <script src="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.js"></script>
+    <script src="https://g.alicdn.com/chatui/icons/2.0.2/index.js"></script>
   </body>
 </html>

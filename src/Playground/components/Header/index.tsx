@@ -9,7 +9,6 @@ import { SelectCase } from './SelectCase'
 // import { SettingAction } from './SettingAction'
 import { ShareAction } from './ShareAction'
 import { downloadFiles, icons } from './utils'
-import { renderAmis } from '../Amis'
 
 import styles from './index.module.less'
 
@@ -19,11 +18,6 @@ import { dependencies } from '@/Playground/templateAmis/package.json'
 export const Header: React.FC = () => {
   const { files, appSetting, changeTheme } = useContext(PlaygroundContext)
   const [downloaded, setDownloaded] = useState(false)
-  const storeRef = useRef<{
-    shareFormRef: any
-  }>({
-    shareFormRef: {},
-  })
   const [amisVerInfo, setAmisVerInfo] = useState({
     npmLatestVer: '',
     playgroundVer: '6.11.0',
@@ -55,11 +49,6 @@ export const Header: React.FC = () => {
 
   return (
     <nav className={styles.header}>
-      {renderAmis('', {
-        scopeRef: (ref) => {
-          storeRef.current.shareFormRef = ref
-        },
-      })}
       <a
         target='_blank'
         title='跳转到amis文档'
@@ -109,7 +98,7 @@ export const Header: React.FC = () => {
           )}
         </TooltipWrapper>
 
-        <ShareAction storeRef={storeRef} />
+        <ShareAction />
 
         <TooltipWrapper placement='bottom' tooltip='下载'>
           <button

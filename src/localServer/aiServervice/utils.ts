@@ -15,6 +15,8 @@ export type CvsMsgItem = {
   data: any
   createdAt: number
   _role: string
+  _omitAiContext?: boolean
+  _omitChatHistory?: boolean
   [key: string]: any
 }
 
@@ -23,7 +25,15 @@ export type CvsMsgListSchema = CvsMsgItem[]
 // 过滤掉不需要的信息
 export const filterMsg = (cvsId: string, rawMsgItem: any) => {
   const transItem = (item: any) => {
-    const requiredItem = pick(item, ['id', '_role', 'code', 'data', 'createdAt'])
+    const requiredItem = pick(item, [
+      'id',
+      'code',
+      'data',
+      'createdAt',
+      '_role',
+      '_omitAiContext',
+      '_omitChatHistory',
+    ])
     const newItem = {
       ...requiredItem,
       cvsId,
@@ -48,10 +58,11 @@ export const filterMsg = (cvsId: string, rawMsgItem: any) => {
 
 export const transMsgToAiMsg = (msgItem: CvsMsgItem) => {
   const transItem = (item: any) => {
-    const { _role: role, data = {} } = item
+    const { _role: role, data = {}, _omitAiContext } = item
     return {
       role,
       content: get(data, 'text') || '',
+      _omitAiContext,
     }
   }
 

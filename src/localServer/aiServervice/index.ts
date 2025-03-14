@@ -3,10 +3,19 @@
  */
 
 import { uuidv4 } from 'amis-core'
+import axios from 'axios'
 import { set, get, update, del } from 'idb-keyval'
-import { reverse } from 'lodash'
+import { isEmpty, last, omit } from 'lodash'
 
-import { bigModeConfig, bigModelApi, bigModeApiKey } from './aiServerConfig'
+import {
+  bigModeConfig,
+  bigModelApi,
+  bigModeApiKey,
+  getSystemPromptMsg,
+  updateSystemPrompt,
+  AiRole,
+  clearPromptFileCache,
+} from './aiServerConfig'
 import {
   ConversionItem,
   ConversionSchema,
@@ -19,6 +28,8 @@ import {
 } from './utils'
 
 import { hash2json, json2hash } from '@/Playground/utils'
+
+export { updateSystemPrompt, AiRole, clearPromptFileCache }
 
 const dbKey = {
   aiConversion: 'app_ai_conversion',
@@ -103,7 +114,7 @@ export const setCvsMsgList = async (cvsId: string, msgList: CvsMsgListSchema) =>
 }
 
 // 添加消息
-export const appendCvsMsgItem = async (cvsId: string, msgItems: CvsMsgItem[]) => {
+export const appendCvsMsgItem = async (cvsId: string, msgItems: CvsMsgItem | CvsMsgItem[]) => {
   await update(dbKey.aiCvsMsgList(cvsId), (compressed?: string) => {
     let msgList = compressed ? hash2json(compressed) : []
 
@@ -128,7 +139,7 @@ type AskOptions = {
 export const sendMsgSync = async (options: AskOptions) => {
   const { csvId, withContext, messages, abortSignal, onChunk, onDone, onError } = options
 
-  const { messages: baseMsgs = [], ...restConfig } = bigModeConfig
+  const { ...restConfig } = bigModeConfig
 
   let contextMsgs = []
   if (csvId && withContext) {
@@ -137,7 +148,13 @@ export const sendMsgSync = async (options: AskOptions) => {
   }
 
   // 最新的消息 在最下面
-  const allMsgs = baseMsgs.concat(contextMsgs).concat(messages)
+  const allMsgs = [getSystemPromptMsg()]
+    .concat(contextMsgs)
+    .concat(messages)
+    .flatMap((msg) => {
+      const { _omitAiContext, ...aiMsg } = msg
+      return _omitAiContext ? [] : aiMsg
+    })
 
   const response = await fetch(bigModelApi.ask, {
     method: 'post',
@@ -216,4 +233,171 @@ export const sendMsgSync = async (options: AskOptions) => {
         })
     }
   }
+}
+
+// 暴力删除文件
+const forceDeleteFile = async (id?: string) => {
+  if (!id) {
+    return
+  }
+  try {
+    const result = await axios.delete(bigModelApi.deleteFile(id), {
+      headers: {
+        Authorization: bigModeApiKey,
+      },
+    })
+    return result.data
+  } catch (err) {
+    //
+  }
+}
+
+// 本地解析文本文件
+const extractFileAtLocal = (file: File) => {
+  return new Promise((resolve, reject) => {
+    // 定义支持的文本类型
+    const validFileTypes = '.csv,.txt,.html,.js,.ts,.jsx,.tsx,.xml,.yaml,.yml,.json'.split(',')
+    const fileSuffix = `.${last(file.name.split('.'))}`
+
+    if (!validFileTypes.includes(fileSuffix)) {
+      resolve({
+        fileTypeNotAllow: true,
+      })
+      return
+    }
+
+    const reader = new FileReader()
+
+    // 定义文件读取完成后的回调函数
+    reader.onload = function (e) {
+      resolve({
+        fileContent: e.target?.result || '',
+      }) // 解析成功，返回文件内容
+    }
+
+    // 定义文件读取错误的回调函数
+    reader.onerror = function () {
+      reject({
+        msg: '读取文件信息错误',
+      })
+    }
+
+    // 读取文件为文本
+    reader.readAsText(file)
+  })
+}
+
+type ExtractInfo = {
+  file: any
+  fileId: string
+  fileName: string
+  fileContent: string
+  isDeleted: boolean
+  err: any
+}
+const extractSingleFile = async (options: Partial<ExtractInfo>): Promise<ExtractInfo> => {
+  const { file } = options
+
+  if (!file) {
+    throw new Error('文件不存在')
+  }
+
+  // 如果既存ID又存在内容，直接返回
+  if (options.fileId && options.fileContent) {
+    // 防止没有删除干净
+    if (!options.isDeleted) {
+      await forceDeleteFile(options.fileId)
+    }
+    return omit(options, ['err']) as ExtractInfo
+  }
+
+  let result = {
+    file,
+    fileId: '',
+    fileName: '',
+    fileContent: '',
+    isDeleted: false,
+    err: null,
+  }
+
+  try {
+    const { fileTypeNotAllow, fileContent } = await extractFileAtLocal(file)
+
+    if (!fileTypeNotAllow) {
+      result = {
+        file,
+        fileId: file.id,
+        fileName: file.name,
+        fileContent,
+        isDeleted: true,
+        err: null,
+      }
+      return result
+    }
+
+    // 如果存在 ID 先进行删除 （保持云端与本地一致）
+    if (!options.isDeleted) {
+      await forceDeleteFile(options.fileId)
+    }
+
+    // 上传文件
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('purpose', 'file-extract')
+    const uploadRes = await axios
+      .post(bigModelApi.uploadFile, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: bigModeApiKey,
+        },
+      })
+      .catch((err) => {
+        const errData = err.response?.data
+        throw isEmpty(errData)
+          ? {
+              msg: '上传文件出错',
+            }
+          : errData
+      })
+    const { id, filename } = uploadRes.data
+    result.fileId = id
+    result.fileName = filename
+
+    // 解析文件
+    const extractRes = await axios
+      .get(bigModelApi.extractFile(id), {
+        headers: {
+          Authorization: bigModeApiKey,
+        },
+      })
+      .catch((err) => {
+        const errData = err.response?.data
+        throw isEmpty(errData)
+          ? {
+              msg: '解析文件出错',
+            }
+          : errData
+      })
+    const { content } = extractRes.data
+    result.fileContent = content
+
+    // 删除文件
+    const deleteRes = await forceDeleteFile(id)
+    result.isDeleted = deleteRes?.deleted || false
+  } catch (err) {
+    if (result.fileId) {
+      await forceDeleteFile(result.fileId)
+    }
+
+    result.err = err
+    console.log('解析文件发生错误：', err)
+  }
+
+  return result
+}
+
+export const extractFilesTexts = async (
+  fileList: Partial<ExtractInfo>[]
+): Promise<ExtractInfo[]> => {
+  return Promise.all(fileList.map(extractSingleFile))
 }

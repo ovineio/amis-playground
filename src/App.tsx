@@ -6,6 +6,8 @@
 
 import { ToastComponent, AlertComponent } from 'amis-ui'
 
+import { GlobalAmisHolder } from './Playground/components/Amis'
+
 import { Playground } from '@/Playground'
 
 function App() {
@@ -13,6 +15,7 @@ function App() {
     <>
       <ToastComponent />
       <AlertComponent />
+      <GlobalAmisHolder />
       <Playground />
     </>
   )

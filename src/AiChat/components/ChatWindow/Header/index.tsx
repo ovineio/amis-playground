@@ -1,13 +1,18 @@
 // TODO:  整理所有 ICON 封装成组件
-import CloseIcon from './Close.svg?raw'
-import SizeIcon from './Size.svg?raw'
+import CloseIcon from './assets/Close.svg?raw'
+import MoveIcon from './assets/Move.svg?raw'
+import SizeIcon from './assets/Size.svg?raw'
+import { useMoveable } from '../../Common/useMoveable'
+import { useResizable } from '../../Common/useReizeable'
 
 import styles from './index.module.less'
 
 export const Header = () => {
-  const storeRef = React.useRef<any>({
+  const storeRef = React.useRef({
     resizeTrigger: null,
     resizeContainer: null,
+    dragContainer: null,
+    dragTrigger: null,
     isResizing: false,
     x: 0,
     y: 0,
@@ -16,47 +21,23 @@ export const Header = () => {
   })
 
   React.useEffect(() => {
-    const { resizeTrigger } = storeRef.current
-    if (!resizeTrigger) {
-      return
-    }
+    const aiRoot = document.querySelector('#aiChatRoot')
 
-    storeRef.current.resizeContainer = document.querySelector('#aiChatRoot .ChatWrapper')
-
-    storeRef.current.resizeTrigger.addEventListener('mousedown', (e) => {
-      const { resizeContainer } = storeRef.current
-      storeRef.current = {
-        ...storeRef.current,
-        isResizing: true,
-        x: e.clientX,
-        y: e.clientY,
-        width: resizeContainer.offsetWidth,
-        height: resizeContainer.offsetHeight,
-      }
-      document.addEventListener('mousemove', resize)
-      document.addEventListener('mouseup', stopResize)
-    })
-
-    const resize = (e) => {
-      const { isResizing, resizeContainer, x, y, width, height } = storeRef.current
-      if (isResizing) {
-        const newWidth = width + (e.clientX - x)
-        const newHeight = height - (e.clientY - y)
-        resizeContainer.style.width = `${newWidth}px`
-        resizeContainer.style.height = `${newHeight}px`
-      }
-    }
-
-    const stopResize = () => {
-      storeRef.current.isResizing = false
-      document.removeEventListener('mousemove', resize)
-      document.removeEventListener('mouseup', stopResize)
-    }
-
-    return () => {
-      storeRef.current.resizeTrigger.removeEventListener('mousedown')
-    }
+    storeRef.current.resizeContainer = aiRoot.querySelector('.ChatWrapper')
+    storeRef.current.dragContainer = aiRoot.querySelector('.AiChatEntry')
   }, [])
+
+  useMoveable({
+    reactIns: React,
+    container: storeRef.current.dragContainer,
+    trigger: storeRef.current.dragTrigger,
+  })
+
+  useResizable({
+    reactIns: React,
+    container: storeRef.current.resizeContainer,
+    trigger: storeRef.current.resizeTrigger,
+  })
 
   const handleClose = () => {
     window.postMessage({
@@ -69,6 +50,12 @@ export const Header = () => {
       <i></i>
       <span>Amis Bot</span>
       <div className={styles.right}>
+        <button
+          title='移动位置'
+          className={styles.move}
+          ref={(ref) => (storeRef.current.dragTrigger = ref)}
+          dangerouslySetInnerHTML={{ __html: MoveIcon }}
+        />
         <button
           title='调整大小'
           className={styles.resize}

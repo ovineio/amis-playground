@@ -80,5 +80,3 @@ const AppEntry = () => {
 }
 
 ReactDOM.createRoot(document.getElementById('aiChatRoot')!).render(<AppEntry />)
-
-

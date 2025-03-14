@@ -160,3 +160,17 @@ export const updateLocation = (url: string, replace = true) => {
 export const isMac = () => {
   return navigator.platform.toUpperCase().indexOf('MAC') >= 0
 }
+
+export const formatFileSize = (bytes: number = 0) => {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB']
+  let index = 0
+
+  // Convert bytes to the appropriate unit
+  while (bytes >= 1024 && index < units.length - 1) {
+    bytes /= 1024
+    index++
+  }
+
+  // Format the number to two decimal places
+  return `${bytes.toFixed(2)} ${units[index]}`
+}

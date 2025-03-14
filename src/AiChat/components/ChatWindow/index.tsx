@@ -8,6 +8,7 @@ import {
   abortCurrReplying,
   askToHumanPrompt,
   isChatSdkLoad,
+  uploadFiles,
 } from './chatContrl'
 import { Header } from './Header'
 import defBot from '../../assets/def-bot.jpeg'
@@ -38,6 +39,14 @@ export const initChatBot = (opts: { root: any }) => {
         avatar: defUser,
       },
       messages: getDefaultMsgs(),
+      toolbar: [
+        {
+          // 支持配置成内置icon名称
+          type: 'uploadFile',
+          title: '上传文件',
+          icon: 'folder',
+        },
+      ],
       quickReplies: [
         {
           name: '清空会话',
@@ -74,10 +83,23 @@ export const initChatBot = (opts: { root: any }) => {
       // renderMessageContent() {
       //   //
       // }
+      onToolbarClick: function (item) {
+        switch (item.type) {
+          case 'uploadFile':
+            uploadFiles()
+            break;
+          default:
+        }
+      },
     },
     requests: {
       history: getHistoryMsgs,
-      send: sendMsg,
+      send: (userMsg: any) => {
+        sendMsg({
+          isserMsg: true,
+          msg: userMsg,
+        })
+      },
     },
     components: {
       // ConversionPanel: () => {

@@ -1,1 +1,0 @@
-import{a as t,e as a,f as d,h as o}from"./index-d4321687.js";import{DateControlRenderer as n}from"./InputDate-33f07b58.js";var f=function(r){t(e,r);function e(){return r!==null&&r.apply(this,arguments)||this}return e.defaultProps=a(a({},n.defaultProps),{embed:!0}),e=d([o({type:"calendar"})],e),e}(n);export{f as CalendarRenderer};

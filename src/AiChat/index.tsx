@@ -1,6 +1,7 @@
 /**
  * TODO:
- * 2. 支持多会话
+ * 1. 支持多会话
+ * 2. 加快显示打字速度，太慢了
  */
 
 import { useEffect, useRef, useState } from 'react'

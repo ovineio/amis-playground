@@ -6,7 +6,7 @@
 
 import { ToastComponent, AlertComponent } from 'amis-ui'
 
-import { GlobalAmisHolder } from './Playground/components/Amis'
+import { GlobalAmisHolder } from './Amis'
 
 import { Playground } from '@/Playground'
 

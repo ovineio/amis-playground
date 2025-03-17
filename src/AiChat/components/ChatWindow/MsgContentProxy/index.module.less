@@ -1,0 +1,32 @@
+.botMsgContainer {
+  max-width: 90%;
+  &.msgWidthFull {
+    width: 90%;
+
+    :global {
+      pre:has(.tongyi-ui-highlighter) {
+        padding: 12px 0;
+      }
+      .markdown-card {
+        padding: 12px;
+      }
+      .foundation-model {
+        width: 100%;
+        max-width: auto;
+      }
+      .markdown-card {
+        width: 100%;
+      }
+      .tongyi-ui-highlighter {
+        border: 1px solid #f2f3f7;
+      }
+    }
+  }
+}
+
+.sandboxRoot {
+  max-height: 500px;
+  min-height: 200px;
+  min-width: 500px;
+  width: 100%;
+}

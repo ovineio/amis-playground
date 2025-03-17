@@ -2,9 +2,9 @@ import { toast, confirm, anyChanged, TooltipWrapper } from 'amis'
 import copy from 'copy-to-clipboard'
 import { useContext, useState } from 'react'
 
-import { getGlobalAmisScope } from '../../Amis'
 import { icons } from '../utils'
 
+import { getGlobalAmisScope } from '@/Amis'
 import { getShareCache, getShareUrl } from '@/localServer/shareService'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 

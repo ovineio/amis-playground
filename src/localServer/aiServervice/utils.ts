@@ -1,4 +1,5 @@
 import { get, pick } from 'lodash'
+import { AiRole } from './aiServerConfig'
 
 export type ConversionItem = {
   id: string
@@ -77,26 +78,6 @@ export const transMsgToAiMsg = (msgItem: CvsMsgItem) => {
   }
 
   return transItem(msgItem)
-}
-
-const idMsgContentMapRef: any = {}
-export const formatMsg = (data: Record<string, any>) => {
-  idMsgContentMapRef[data.id] =
-    (idMsgContentMapRef[data.id] || '') + (data.choices?.[0]?.delta?.content || '')
-
-  return {
-    code: 'foundation-model',
-    id: data.id,
-    data: {
-      sentenceList: [
-        {
-          content: idMsgContentMapRef[data.id],
-        },
-      ],
-      // 是否流式结束
-      streamEnd: !!data.choices?.[0]?.finish_reason,
-    },
-  }
 }
 
 export const resolveChunk = (chunk: string) => {

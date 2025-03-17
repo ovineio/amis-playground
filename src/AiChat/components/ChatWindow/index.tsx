@@ -11,6 +11,7 @@ import {
   uploadFiles,
 } from './chatContrl'
 import { Header } from './Header'
+import { MsgContentProxy } from './MsgContentProxy'
 import defBot from '../../assets/def-bot.jpeg'
 import defUser from '../../assets/def-user.png'
 
@@ -80,14 +81,14 @@ export const initChatBot = (opts: { root: any }) => {
       //   }
       // },
       // 对 消息内容进行处理
-      // renderMessageContent() {
-      //   //
-      // }
+      renderMessageContent({ msg, _ctx, children }) {
+        return <MsgContentProxy msg={msg}>{children}</MsgContentProxy>
+      },
       onToolbarClick: function (item) {
         switch (item.type) {
           case 'uploadFile':
             uploadFiles()
-            break;
+            break
           default:
         }
       },

@@ -1,4 +1,6 @@
 // TODO:  整理所有 ICON 封装成组件
+import { useEffect, useRef } from 'react'
+
 import CloseIcon from './assets/Close.svg?raw'
 import MoveIcon from './assets/Move.svg?raw'
 import SizeIcon from './assets/Size.svg?raw'
@@ -8,7 +10,7 @@ import { useResizable } from '../../Common/useReizeable'
 import styles from './index.module.less'
 
 export const Header = () => {
-  const storeRef = React.useRef({
+  const storeRef = useRef({
     resizeTrigger: null,
     resizeContainer: null,
     dragContainer: null,
@@ -20,7 +22,7 @@ export const Header = () => {
     height: 0,
   })
 
-  React.useEffect(() => {
+  useEffect(() => {
     const aiRoot = document.querySelector('#aiChatRoot')
 
     storeRef.current.resizeContainer = aiRoot.querySelector('.ChatWrapper')
@@ -28,13 +30,11 @@ export const Header = () => {
   }, [])
 
   useMoveable({
-    reactIns: React,
     container: storeRef.current.dragContainer,
     trigger: storeRef.current.dragTrigger,
   })
 
   useResizable({
-    reactIns: React,
     container: storeRef.current.resizeContainer,
     trigger: storeRef.current.resizeTrigger,
   })

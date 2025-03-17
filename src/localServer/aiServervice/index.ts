@@ -22,7 +22,6 @@ import {
   CvsMsgListSchema,
   filterMsg,
   resolveChunk,
-  formatMsg,
   CvsMsgItem,
   transMsgToAiMsg,
 } from './utils'
@@ -129,6 +128,7 @@ export const appendCvsMsgItem = async (cvsId: string, msgItems: CvsMsgItem | Cvs
 // 同步发送消息
 type AskOptions = {
   messages: any[]
+  formatChunk: (chunks: any[]) => any
   csvId?: string
   withContext?: boolean
   abortSignal?: any
@@ -137,7 +137,7 @@ type AskOptions = {
   onChunk?: (...args: any[]) => void
 }
 export const sendMsgSync = async (options: AskOptions) => {
-  const { csvId, withContext, messages, abortSignal, onChunk, onDone, onError } = options
+  const { csvId, withContext, messages, abortSignal, onChunk, onDone, onError, formatChunk } = options
 
   const { ...restConfig } = bigModeConfig
 
@@ -211,12 +211,7 @@ export const sendMsgSync = async (options: AskOptions) => {
 
     const chunk = decoder.decode(value, { stream: false })
     const chunkItems = resolveChunk(chunk)
-
-    chunkItems.forEach((item) => {
-      if (item.id) {
-        formattedMsg = formatMsg(item)
-      }
-    })
+    formattedMsg = formatChunk(chunkItems)
 
     if (!formattedMsg.id) {
       onError &&

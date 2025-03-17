@@ -5,11 +5,11 @@
 import { findTree, mapTree, registerFilter } from 'amis-core'
 import { get } from 'lodash'
 
-import { setAmisValue } from '../../Amis/utils'
 import { setCaseFiles } from '../utils'
 
 import styles from './index.module.less'
 
+import { setAmisValue } from '@/Amis'
 import {
   caseType,
   getCasesTree,

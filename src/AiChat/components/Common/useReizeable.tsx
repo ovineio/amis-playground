@@ -1,12 +1,13 @@
+import { useEffect, useRef } from "react"
+
 type Props = {
   container?: any
   trigger?: any
-  reactIns: any // 因为 ChatSdk 已经将 React 打包进来了。
 }
 export const useResizable = (options: Props) => {
-  const { reactIns, container: resizeContainer, trigger: resizeTrigger } = options
+  const { container: resizeContainer, trigger: resizeTrigger } = options
 
-  const storeRef = reactIns.useRef({
+  const storeRef = useRef({
     isResizing: false,
     isInitial: false,
     x: 0,
@@ -15,7 +16,7 @@ export const useResizable = (options: Props) => {
     height: 0,
   })
 
-  reactIns.useEffect(() => {
+  useEffect(() => {
     if (!resizeContainer || !resizeTrigger || storeRef.current.isInitial) {
       return
     }

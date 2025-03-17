@@ -2,6 +2,7 @@ import { resolve } from 'path'
 
 import react from '@vitejs/plugin-react-swc'
 import { defineConfig } from 'vite'
+import { viteExternalsPlugin } from 'vite-plugin-externals'
 import monacoEditorPlugin from 'vite-plugin-monaco-editor'
 import svgr from 'vite-plugin-svgr'
 
@@ -30,6 +31,14 @@ export default defineConfig({
       },
     }),
     monacoEditorPlugin({}),
+    viteExternalsPlugin({
+      react: 'React',
+      'react-dom': 'ReactDOM',
+      'react-dom/client': 'ReactDOM',
+      ChatUI: 'ChatSDK',
+      'chatui/core': 'ChatSDK',
+      '@ali/chatui-sdk': 'ChatSDK',
+    }),
   ],
   css: {
     preprocessorOptions: {

@@ -1,13 +1,14 @@
+import { useEffect, useRef } from "react"
+
 type Props = {
   container?: any
   trigger?: any
-  reactIns: any // 因为 ChatSdk 已经将 React 打包进来了。
 }
 
 export const useMoveable = (options: Props) => {
-  const { reactIns, container: dragContainer, trigger: dragTrigger } = options
+  const { container: dragContainer, trigger: dragTrigger } = options
 
-  const storeRef = reactIns.useRef({
+  const storeRef = useRef({
     isDragging: false,
     isInitial: false,
     position: {
@@ -20,7 +21,7 @@ export const useMoveable = (options: Props) => {
     },
   })
 
-  reactIns.useEffect(() => {
+  useEffect(() => {
     if (!dragTrigger || !dragContainer || storeRef.current.isInitial) {
       return
     }

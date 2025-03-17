@@ -58,7 +58,9 @@
     "allotment": "^1.19.3",
     "amis": "6.11.0",
     "amis-core": "6.11.0",
+    "amis-editor": "6.11.0",
     "amis-ui": "6.11.0",
+    "amis-widget": "3.2.2",
     "axios": "1.7.9",
     "classnames": "^2.3.2",
     "copy-to-clipboard": "3.3.1",
@@ -123,6 +125,7 @@
     "stylis": "^4.1.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
+    "vite-plugin-externals": "^0.6.2",
     "vite-plugin-monaco-editor": "^1.1.0",
     "vite-plugin-svgr": "^4.3.0"
   },

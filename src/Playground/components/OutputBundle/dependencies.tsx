@@ -12,10 +12,6 @@ import * as reactRouter from 'react-router'
 import * as reactRouterDom from 'react-router-dom'
 import sinon from 'sinon'
 
-import 'amis/lib/themes/cxd.css'
-import 'amis/lib/helper.css'
-import '@/Playground/templateAmis/public/iconfont.css'
-
 const dependencies = {
   react: React,
   amis,

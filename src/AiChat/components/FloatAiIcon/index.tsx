@@ -19,7 +19,6 @@ export const FloatAiIcon = (props: Props) => {
   })
 
   const { isDragging } = useMoveable({
-    reactIns: React,
     container: storeRef.current.dragContainer,
     trigger: storeRef.current.dragTrigger,
   })

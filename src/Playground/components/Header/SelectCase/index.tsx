@@ -6,18 +6,17 @@ import { get, last } from 'lodash'
 import { useContext, useRef } from 'react'
 
 import { checkCaseValid, getNewVersionDialog } from './utils'
-import { doAmisAction, setAmisValue } from '../../Amis/utils'
 import { getCaseFiles, setCaseFiles, setCaseFiles2Pristine } from '../utils'
 
 import styles from './index.module.less'
 
+import { renderAmis, doAmisAction, setAmisValue } from '@/Amis'
 import {
   caseType,
   delCaseVersion,
   getCaseVersions,
   updateCaseTree,
 } from '@/localServer/caseService'
-import { renderAmis } from '@/Playground/components/Amis'
 import { PlaygroundContext } from '@/Playground/PlaygroundContext'
 import { getUrlPath, updateLocation } from '@/Playground/utils'
 

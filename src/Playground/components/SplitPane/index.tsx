@@ -12,7 +12,7 @@ import type { ISplitPane } from '@/Playground/types'
 import 'allotment/dist/style.css'
 
 export const SplitPane: React.FC<ISplitPane> = (props) => {
-  const { defaultSizes } = props
+  const { defaultSizes, saveSplit = false } = props
 
   const SplitLinePosition = {
     LEFT: [0, Infinity],
@@ -64,9 +64,11 @@ export const SplitPane: React.FC<ISplitPane> = (props) => {
   const { run: handleChange } = useDebounceFn(
     (size: number[]) => {
       storeRef.current.size = size
-      setAppSetting({
-        splitPaneSize: size,
-      })
+      if (saveSplit) {
+        setAppSetting({
+          splitPaneSize: size,
+        })
+      }
       if (size.includes(0)) {
         setReloadId(reloadId + 1)
       }

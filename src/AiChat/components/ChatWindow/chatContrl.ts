@@ -1,7 +1,10 @@
-import { alert, toast } from 'amis'
+import { toast } from 'amis'
 import { uuidv4 } from 'amis-core'
-import { find, get, last, random, set } from 'lodash'
+import { get, last, random, set } from 'lodash'
 
+import { formatChunk } from './utils'
+
+import { getGlobalAmisScope } from '@/Amis'
 import {
   AiRole,
   appendCvsMsgItem,
@@ -13,7 +16,6 @@ import {
   setCvsMsgList,
   updateSystemPrompt,
 } from '@/localServer/aiServervice'
-import { getGlobalAmisScope } from '@/Playground/components/Amis'
 import { formatFileSize } from '@/Playground/utils'
 
 let chatBot: any = null
@@ -244,6 +246,7 @@ export const sendMsg = (options: SendMsgOptions) => {
     withContext: true,
     abortSignal: chatBot.sendMsgAbortCtrl.signal,
     messages: [aiMsg], // 发送给 AI
+    formatChunk,
     onError: handleError,
     onChunk: handleChunk,
     onDone: handleDone,

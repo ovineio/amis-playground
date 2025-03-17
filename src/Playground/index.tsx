@@ -197,7 +197,7 @@ const ReactPlayground = (props: IPlayground) => {
     >
       {showHeader ? <Header /> : null}
       <div style={{ height: `calc(100% - ${showHeader ? 50 : 0}px)` }}>
-        <SplitPane defaultSizes={appSetting.splitPaneSize}>
+        <SplitPane saveSplit defaultSizes={appSetting.splitPaneSize} >
           <EditorContainer
             options={options}
             showFileSelector={showFileSelector}

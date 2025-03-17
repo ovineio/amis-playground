@@ -29,6 +29,7 @@ export interface ICustomFiles {
 export interface ISplitPane {
   children?: React.ReactNode[]
   defaultSizes?: number[]
+  saveSplit?: boolean
 }
 
 export type IEditorOptions = editor.IStandaloneEditorConstructionOptions & any

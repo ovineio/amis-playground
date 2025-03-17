@@ -35,10 +35,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link type="image/x-icon" rel="shortcut icon" href="./amis-logo.png">
     
+    <!-- 将样式从 npm 包中抽离为独立文件，因为：chat msg框预览 amis 样式冲突，使用 shadowDom 了 -->
+    <link rel="stylesheet" href="./amis/cxd.css" />
+    <link rel="stylesheet" href="./amis/helper.css" />
+    <link rel="stylesheet" href="./amis/iconfont.css" />
     
     <link rel="stylesheet" href="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.css" />
     <title>Amis Playground</title>
     <script>
+      // TODO：支持配置 enableAMISDebug
       window.enableAMISDebug = true;
       var _hmt = _hmt || [];
       (function() {
@@ -52,8 +57,8 @@
         s.parentNode.insertBefore(hm, s);
       })();
     </script>
-    <script type="module" crossorigin src="./assets/index-4b7670c0.js"></script>
-    <link rel="stylesheet" href="./assets/index-d82cf053.css">
+    <script type="module" crossorigin src="./assets/index-d5f8b387.js"></script>
+    <link rel="stylesheet" href="./assets/index-9edb53b5.css">
   </head>
   <body>
     <div id="root"></div>
@@ -61,6 +66,6 @@
     
     <!--TODO: 将 react 从 chatSdk 剥离出来 使用 pure.js （） -->
     <script src="https://g.alicdn.com/code/npm/@ali/chatui-sdk/6.6.2/ChatSDK.js"></script>
-    <script src="https://g.alicdn.com/chatui/icons/2.0.2/index.js"></script>
+    <script async src="https://g.alicdn.com/chatui/icons/2.0.2/index.js"></script>
   </body>
 </html>

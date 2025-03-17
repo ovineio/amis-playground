@@ -1,1 +1,0 @@
-import{a as e,f as n,h as o,B as u}from"./index-4b7670c0.js";var p=function(r){e(t,r);function t(){return r!==null&&r.apply(this,arguments)||this}return t=n([o({type:"button-group"})],t),t}(u);export{p as ButtonGroupRenderer,u as default};
